@@ -1,17 +1,18 @@
 "use client";
 
-type DatePickerCellProps = {
-  value: string;
-  onChange: (value: string) => void;
+import type { NextAction } from "@/lib/applications/types";
+
+type MultiSelectDropdownProps = {
+  value: NextAction[];
+  onChange: (value: NextAction[]) => void;
 };
 
-export function DatePickerCell({ value, onChange }: DatePickerCellProps) {
+export function MultiSelectDropdown({ value, onChange }: MultiSelectDropdownProps) {
   return (
     <input
-      aria-label="Application Date"
-      type="date"
-      value={value}
-      onChange={(event) => onChange(event.target.value)}
+      aria-label="Next Action"
+      value={value.join(", ")}
+      onChange={(event) => onChange(event.target.value.split(",").map((v) => v.trim()) as NextAction[])}
       className="h-10 w-full rounded-md border border-transparent bg-transparent px-2 text-sm text-zinc-100 outline-none transition [color-scheme:dark] hover:bg-white/[0.04] focus:border-blue-300/50 focus:bg-[#10141b]"
     />
   );

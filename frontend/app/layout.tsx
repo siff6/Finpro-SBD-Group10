@@ -31,9 +31,14 @@ export default function RootLayout({
   return (
     <html
       lang="id"
+      suppressHydrationWarning
       className={`${inter.variable} ${geistMono.variable} ${display.variable} h-full antialiased`}
     >
-      <body className="min-h-full bg-[#07090d] text-white">{children}</body>
+      <body
+      suppressHydrationWarning
+      className="min-h-full bg-[#07090d] text-white">
+        {children}
+      </body>
     </html>
   );
 }
