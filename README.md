@@ -1,36 +1,17 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Applytics - Finpro SBD Group 10
 
-## Getting Started
+Applytics merupakan sebuah platform yang dirancang untuk membantu pengguna mengelola dan memonitor seluruh proses pencarian kerja secara terstruktur dan terpusat. Sistem ini menyediakan tabel interaktif yang menyimpan berbagai informasi penting seperti nama perusahaan, posisi pekerjaan, status lamaran, tanggal aplikasi, estimasi gaji, tindakan lanjutan, kontak recruiter, website perusahaan, serta tautan portofolio atau referensi pendukung. Setiap data lamaran dapat dikelola melalui fitur tambah, ubah, hapus, pencarian, filtering, dan sorting sehingga pengguna dapat memantau progres rekrutmen dengan lebih mudah dan efisien. Dari sisi basis data, sistem menggunakan beberapa tabel yang saling terhubung untuk menyimpan data pengguna, perusahaan, aplikasi pekerjaan, status seleksi, dan aktivitas lanjutan. Selain berfungsi sebagai pencatat lamaran kerja, website ini juga mendukung analisis produktivitas dan statistik pencarian kerja sehingga pengguna dapat mengorganisasi proses job hunting secara lebih profesional, rapi, dan terukur.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 👥 Anggota Kelompok 10
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Berikut adalah anggota tim pengembang Finpro SBD - Group 10:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| No | Nama | NPM | Peran / Fokus |
+|---|---|---|---|
+| 1 | **Muhammad Hashif Jade** | 2406396786 | Frontend |
+| 2 | **Muhammad Zaki Alkhairi** | 2406432375 | Frontend |
+| 3 | **Naziehan Labieb** | 2406487102 | Backend |
+| 4 | **Zulfahmi Fajri** | 2406345425 | Backend |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
