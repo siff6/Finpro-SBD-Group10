@@ -15,3 +15,4 @@ Berikut adalah anggota tim pengembang Finpro SBD - Group 10:
 | 3 | **Naziehan Labieb** | 2406487102 | Backend |
 | 4 | **Zulfahmi Fajri** | 2406345425 | Backend |
 
+---
