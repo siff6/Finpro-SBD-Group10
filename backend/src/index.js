@@ -2,7 +2,11 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import applicationsRoutes from "./routes/applications.routes.js";
+import companiesRoutes from "./routes/companies.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
+import remindersRoutes from "./routes/reminders.routes.js";
+import notesRoutes from "./routes/notes.routes.js";
+import statusHistoryRoutes from "./routes/statusHistory.routes.js";
 import errorHandler from "./middleware/errorHandler.js";
 import { testConnection } from "./config/db.js";
 import { connectRedis } from "./config/redis.js";
@@ -20,7 +24,11 @@ app.get("/api/health", (req, res) => {
 });
 
 app.use("/api/applications", applicationsRoutes);
+app.use("/api/companies", companiesRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/reminders", remindersRoutes);
+app.use("/api", notesRoutes);
+app.use("/api", statusHistoryRoutes);
 
 app.use(errorHandler);
 
