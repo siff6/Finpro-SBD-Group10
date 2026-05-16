@@ -36,9 +36,9 @@ export function ApplicationCharts({ applications }: ApplicationChartsProps) {
           </div>
         </div>
 
-        <div className="mt-5 h-72">
+        <div className="mt-5 h-72 min-h-[288px]">
           {mounted ? (
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="99%" height="100%" minWidth={0} minHeight={0}>
               <PieChart>
                 <Tooltip
                   contentStyle={{
@@ -85,9 +85,9 @@ export function ApplicationCharts({ applications }: ApplicationChartsProps) {
           </p>
         </div>
 
-        <div className="mt-5 h-80">
+        <div className="mt-5 h-80 min-h-[320px]">
           {mounted ? (
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="99%" height="100%" minWidth={0} minHeight={0}>
               <BarChart data={monthlyData}>
                 <CartesianGrid stroke="rgba(255,255,255,0.08)" vertical={false} />
                 <XAxis dataKey="date" stroke="#71717a" tickLine={false} axisLine={false} />

@@ -1,28 +1,41 @@
 "use client";
 
 import { useState } from "react";
-import { LogIn, Search, UserRound } from "lucide-react";
+import { LogIn, Search, UserRound, Menu } from "lucide-react"; // tambahin import Menu
 
 type DashboardTopbarProps = {
   username: string;
   onLogin: (username: string) => void;
+  toggleSidebar: () => void; // tambahin props baru ini
 };
 
-export function DashboardTopbar({ username, onLogin }: DashboardTopbarProps) {
+export function DashboardTopbar({ username, onLogin, toggleSidebar }: DashboardTopbarProps) {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [draftName, setDraftName] = useState(username);
 
   return (
     <header className="sticky top-0 z-30 border-b border-white/10 bg-[#07090d]/88 backdrop-blur-xl">
       <div className="flex min-h-16 items-center justify-between gap-4 px-4 sm:px-6">
-        <label className="hidden h-10 w-full max-w-md items-center gap-2 rounded-md border border-white/10 bg-black/20 px-3 text-zinc-500 md:flex">
-          <Search size={16} />
-          <input
-            aria-label="Dashboard search"
-            placeholder="Search jobs, companies, contacts"
-            className="min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-zinc-600"
-          />
-        </label>
+        
+        {/* bagian kiri kita bungkus flex biar tombol menu sama searchnya sejajar */}
+        <div className="flex items-center gap-3 w-full max-w-md">
+          <button
+            type="button"
+            onClick={toggleSidebar}
+            className="hidden lg:grid size-10 place-items-center rounded-md border border-white/10 text-zinc-400 transition hover:bg-white/10 hover:text-white"
+          >
+            <Menu size={18} />
+          </button>
+          
+          <label className="hidden h-10 w-full items-center gap-2 rounded-md border border-white/10 bg-black/20 px-3 text-zinc-500 md:flex">
+            <Search size={16} />
+            <input
+              aria-label="Dashboard search"
+              placeholder="Search jobs, companies, contacts"
+              className="min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-zinc-600"
+            />
+          </label>
+        </div>
 
         <div className="ml-auto flex items-center gap-2">
           <span className="hidden text-sm text-zinc-400 sm:block">Hi, {username}</span>

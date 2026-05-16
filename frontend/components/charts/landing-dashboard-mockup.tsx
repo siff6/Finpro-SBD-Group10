@@ -79,9 +79,9 @@ export function LandingDashboardMockup() {
           </div>
 
           <div className="grid gap-3">
-            <div className="h-36 rounded-md border border-white/10 bg-black/20 p-2">
+            <div className="h-36 min-h-[144px] rounded-md border border-white/10 bg-black/20 p-2">
               {mounted ? (
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="99%" height="100%" minWidth={0} minHeight={0}>
                   <PieChart>
                     <Pie data={pieData} dataKey="value" innerRadius={32} outerRadius={52}>
                       {pieData.map((entry) => (
@@ -94,9 +94,9 @@ export function LandingDashboardMockup() {
                 <div className="size-full rounded-md bg-white/[0.035]" />
               )}
             </div>
-            <div className="h-36 rounded-md border border-white/10 bg-black/20 p-2">
+            <div className="h-36 min-h-[144px] rounded-md border border-white/10 bg-black/20 p-2">
               {mounted ? (
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="99%" height="100%" minWidth={0} minHeight={0}>
                   <BarChart data={barData}>
                     <XAxis dataKey="label" hide />
                     <Bar dataKey="value" fill="#60a5fa" radius={[5, 5, 1, 1]} />

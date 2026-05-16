@@ -22,6 +22,7 @@ export function DashboardShell() {
   const [applications, setApplications] = useState<JobApplication[]>(defaultApplications);
   const [query, setQuery] = useState("");
   const [username, setUsername] = useState("Job Hunter");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [filters, setFilters] = useState<DashboardFilters>({
     status: "All",
     analytics: "Overview",
@@ -112,10 +113,16 @@ export function DashboardShell() {
   }
 
   return (
-    <div className="grid min-h-screen bg-[#07090d] text-white lg:grid-cols-[248px_1fr]">
-      <DashboardSidebar />
-      <div className="min-w-0">
-        <DashboardTopbar username={username} onLogin={login} />
+    // <div className="grid min-h-screen bg-[#07090d] text-white lg:grid-cols-[248px_1fr]">
+    <div className="flex min-h-screen bg-[#07090d] text-white">
+      <DashboardSidebar isOpen={isSidebarOpen} />
+      <div className="flex-1 min-w-0">
+      {/* <div className="min-w-0"> */}
+        <DashboardTopbar 
+          username={username} 
+          onLogin={login} 
+          toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} 
+        />
 
         <main className="mx-auto grid w-full max-w-[1500px] gap-5 px-4 py-5 sm:px-6">
           <section className="flex flex-col gap-2">
