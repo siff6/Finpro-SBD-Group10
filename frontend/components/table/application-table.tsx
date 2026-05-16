@@ -63,8 +63,8 @@ export function ApplicationTable({
         </div>
       </div>
 
-      <div className="w-full max-w-full overflow-x-auto">
-        <table className="w-full min-w-[1280px] border-separate border-spacing-0">
+      <div className="w-full max-w-full overflow-hidden">
+        <table className="w-full table-fixed border-separate border-spacing-0">
           <TableHeader />
           <tbody>
             {applications.map((application) => (

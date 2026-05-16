@@ -12,7 +12,7 @@ export function DatePickerCell({ value, onChange }: DatePickerCellProps) {
       type="date"
       value={value}
       onChange={(event) => onChange(event.target.value)}
-      className="h-10 w-full rounded-md border border-transparent bg-transparent px-2 text-sm text-slate-700 outline-none transition [color-scheme:light] hover:bg-slate-100 focus:border-blue-400 focus:bg-white focus:text-slate-950"
+      className="h-10 w-full min-w-0 rounded-md border border-transparent bg-transparent px-2 text-sm text-slate-700 outline-none transition [color-scheme:light] hover:bg-slate-100 focus:border-blue-400 focus:bg-white focus:text-slate-950"
     />
   );
 }
