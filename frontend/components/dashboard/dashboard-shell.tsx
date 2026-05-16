@@ -71,6 +71,14 @@ type CreateApplicationForm = {
   source: string;
 };
 
+type CreateCompanyForm = {
+  companyName: string;
+  website: string;
+  industry: string;
+  location: string;
+  contact: string;
+};
+
 const validStatuses: ApplicationStatus[] = statusOptions;
 
 function normalizeStatus(status: string): ApplicationStatus {
@@ -119,6 +127,16 @@ function createInitialApplicationForm(): CreateApplicationForm {
   };
 }
 
+function createInitialCompanyForm(): CreateCompanyForm {
+  return {
+    companyName: "",
+    website: "",
+    industry: "",
+    location: "",
+    contact: "",
+  };
+}
+
 function mapBackendApplication(application: BackendApplication): JobApplication {
   return {
     id: application.application_id,
@@ -161,6 +179,10 @@ export function DashboardShell() {
   const [createForm, setCreateForm] = useState<CreateApplicationForm>(
     createInitialApplicationForm,
   );
+  const [createCompanyForm, setCreateCompanyForm] =
+    useState<CreateCompanyForm>(createInitialCompanyForm);
+  const [isCreatingCompany, setIsCreatingCompany] = useState(false);
+  const [createCompanyError, setCreateCompanyError] = useState("");
   const [filters, setFilters] = useState<DashboardFilters>({
     status: "All",
     analytics: "Overview",
@@ -207,13 +229,13 @@ export function DashboardShell() {
     }
   }, []);
 
-  const fetchCompanies = useCallback(async () => {
+  const fetchCompanies = useCallback(async (): Promise<BackendCompany[]> => {
     try {
       const token = window.localStorage.getItem(tokenKey);
 
       if (!token) {
         setCompanies([]);
-        return;
+        return [];
       }
 
       const response = await fetch(`${API_BASE_URL}/companies`, {
@@ -228,9 +250,15 @@ export function DashboardShell() {
         throw new Error(data?.message || "Gagal mengambil data perusahaan.");
       }
 
-      setCompanies(data);
+      const companiesData = Array.isArray(data)
+        ? data
+        : data?.companies || data?.data || [];
+
+      setCompanies(companiesData);
+      return companiesData;
     } catch {
       setCompanies([]);
+      return [];
     }
   }, []);
 
@@ -246,6 +274,19 @@ export function DashboardShell() {
     fetchApplications();
     fetchCompanies();
   }, [fetchApplications, fetchCompanies]);
+
+  useEffect(() => {
+    if (!isCreateModalOpen) {
+      return;
+    }
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isCreateModalOpen]);
 
   const filteredApplications = useMemo(() => {
     const filtered = filterApplications(applications, filters);
@@ -276,6 +317,8 @@ export function DashboardShell() {
 
   function openCreateModal() {
     setCreateApplicationError("");
+    setCreateCompanyError("");
+    setCreateCompanyForm(createInitialCompanyForm());
     setCreateForm({
       ...createInitialApplicationForm(),
       companyId: companies[0]?.company_id || "",
@@ -284,12 +327,13 @@ export function DashboardShell() {
   }
 
   function closeCreateModal() {
-    if (isCreatingApplication) {
+    if (isCreatingApplication || isCreatingCompany) {
       return;
     }
 
     setIsCreateModalOpen(false);
     setCreateApplicationError("");
+    setCreateCompanyError("");
   }
 
   function updateCreateForm(patch: Partial<CreateApplicationForm>) {
@@ -298,6 +342,80 @@ export function DashboardShell() {
       ...patch,
     }));
   }
+
+  function updateCreateCompanyForm(patch: Partial<CreateCompanyForm>) {
+    setCreateCompanyForm((current) => ({
+      ...current,
+      ...patch,
+    }));
+  }
+
+  async function createCompany() {
+  try {
+    setIsCreatingCompany(true);
+    setCreateCompanyError("");
+    setCreateApplicationError("");
+
+    const token = window.localStorage.getItem(tokenKey);
+
+    if (!token) {
+      throw new Error("Sesi login tidak ditemukan. Silakan login ulang.");
+    }
+
+    const companyName = createCompanyForm.companyName.trim();
+
+    if (!companyName) {
+      throw new Error("Nama perusahaan wajib diisi.");
+    }
+
+    const response = await fetch(`${API_BASE_URL}/companies`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        company_name: companyName,
+        website: createCompanyForm.website.trim() || null,
+        industry: createCompanyForm.industry.trim() || null,
+        location: createCompanyForm.location.trim() || null,
+        contact: createCompanyForm.contact.trim() || null,
+      }),
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      throw new Error(data?.message || "Gagal menambahkan perusahaan.");
+    }
+
+    const updatedCompanies = await fetchCompanies();
+    const createdCompany = data?.company || data?.data || data;
+
+    const selectedCompany =
+      updatedCompanies.find(
+        (company) => company.company_id === createdCompany?.company_id,
+      ) ||
+      updatedCompanies.find(
+        (company) =>
+          company.company_name.toLowerCase() === companyName.toLowerCase(),
+      );
+
+    if (selectedCompany) {
+      updateCreateForm({ companyId: selectedCompany.company_id });
+    }
+
+    setCreateCompanyForm(createInitialCompanyForm());
+      } catch (error) {
+        setCreateCompanyError(
+          error instanceof Error
+            ? error.message
+            : "Gagal menambahkan perusahaan.",
+        );
+      } finally {
+        setIsCreatingCompany(false);
+      }
+    }
 
   async function createApplication(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -584,180 +702,309 @@ export function DashboardShell() {
       </div>
 
       {isCreateModalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/30 px-4 py-6 backdrop-blur-sm">
-          <div className="w-full max-w-2xl rounded-xl border border-slate-200 bg-white shadow-xl">
-            <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-5 py-4">
-              <div>
-                <h2 className="text-lg font-semibold text-slate-950">
-                  Tambah Lamaran
-                </h2>
-                <p className="mt-1 text-sm text-slate-600">
-                  Isi detail lamaran baru, lalu simpan ke database.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={closeCreateModal}
-                className="grid size-9 place-items-center rounded-md text-slate-500 transition hover:bg-slate-100 hover:text-slate-950"
-                aria-label="Tutup form tambah lamaran"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <form onSubmit={createApplication} className="grid gap-4 px-5 py-5">
-              {createApplicationError ? (
-                <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-                  {createApplicationError}
+        <div className="fixed inset-0 z-50 overflow-hidden bg-slate-950/30 px-4 py-6 backdrop-blur-sm">
+          <div className="mx-auto flex h-full w-full max-w-4xl items-start justify-center">
+            <div className="flex max-h-full w-full flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl">
+              <div className="shrink-0 flex items-start justify-between gap-4 border-b border-slate-200 px-5 py-4">
+                <div>
+                  <h2 className="text-lg font-semibold text-slate-950">
+                    Tambah Lamaran
+                  </h2>
+                  <p className="mt-1 text-sm text-slate-600">
+                    Isi detail lamaran baru, lalu simpan ke database.
+                  </p>
                 </div>
-              ) : null}
 
-              {companies.length === 0 ? (
-                <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700">
-                  Belum ada data perusahaan. Tambahkan perusahaan terlebih
-                  dahulu sebelum membuat lamaran.
-                </div>
-              ) : null}
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <label className="grid gap-1.5 text-sm">
-                  <span className="font-medium text-slate-700">
-                    Perusahaan
-                  </span>
-                  <select
-                    value={createForm.companyId}
-                    onChange={(event) =>
-                      updateCreateForm({ companyId: event.target.value })
-                    }
-                    disabled={companies.length === 0}
-                    className="h-10 rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none transition [color-scheme:light] focus:border-blue-400 focus:bg-white"
-                  >
-                    {companies.length === 0 ? (
-                      <option value="">Belum ada perusahaan</option>
-                    ) : null}
-
-                    {companies.map((company) => (
-                      <option
-                        key={company.company_id}
-                        value={company.company_id}
-                      >
-                        {company.company_name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label className="grid gap-1.5 text-sm">
-                  <span className="font-medium text-slate-700">Posisi</span>
-                  <input
-                    value={createForm.position}
-                    onChange={(event) =>
-                      updateCreateForm({ position: event.target.value })
-                    }
-                    placeholder="Contoh: Frontend Developer"
-                    className="h-10 rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:bg-white"
-                  />
-                </label>
-
-                <label className="grid gap-1.5 text-sm">
-                  <span className="font-medium text-slate-700">Status</span>
-                  <select
-                    value={createForm.status}
-                    onChange={(event) =>
-                      updateCreateForm({
-                        status: event.target.value as ApplicationStatus,
-                      })
-                    }
-                    className="h-10 rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none transition [color-scheme:light] focus:border-blue-400 focus:bg-white"
-                  >
-                    {statusOptions.map((status) => (
-                      <option key={status} value={status}>
-                        {statusMeta[status].label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label className="grid gap-1.5 text-sm">
-                  <span className="font-medium text-slate-700">
-                    Tanggal Lamaran
-                  </span>
-                  <input
-                    type="date"
-                    value={createForm.applicationDate}
-                    onChange={(event) =>
-                      updateCreateForm({ applicationDate: event.target.value })
-                    }
-                    className="h-10 rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none transition [color-scheme:light] focus:border-blue-400 focus:bg-white"
-                  />
-                </label>
-
-                <label className="grid gap-1.5 text-sm">
-                  <span className="font-medium text-slate-700">Gaji</span>
-                  <input
-                    type="number"
-                    min="0"
-                    value={createForm.salary}
-                    onChange={(event) =>
-                      updateCreateForm({ salary: event.target.value })
-                    }
-                    placeholder="Contoh: 8000000"
-                    className="h-10 rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:bg-white"
-                  />
-                </label>
-
-                <label className="grid gap-1.5 text-sm">
-                  <span className="font-medium text-slate-700">
-                    Jenis Kerja
-                  </span>
-                  <select
-                    value={createForm.jobType}
-                    onChange={(event) =>
-                      updateCreateForm({ jobType: event.target.value as JobType })
-                    }
-                    className="h-10 rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none transition [color-scheme:light] focus:border-blue-400 focus:bg-white"
-                  >
-                    {jobTypeOptions.map((jobType) => (
-                      <option key={jobType} value={jobType}>
-                        {jobType}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label className="grid gap-1.5 text-sm sm:col-span-2">
-                  <span className="font-medium text-slate-700">Sumber</span>
-                  <input
-                    value={createForm.source}
-                    onChange={(event) =>
-                      updateCreateForm({ source: event.target.value })
-                    }
-                    placeholder="Contoh: LinkedIn, Glints, JobStreet"
-                    className="h-10 rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:bg-white"
-                  />
-                </label>
-              </div>
-
-              <div className="flex flex-col-reverse gap-2 border-t border-slate-200 pt-4 sm:flex-row sm:justify-end">
                 <button
                   type="button"
                   onClick={closeCreateModal}
-                  disabled={isCreatingApplication}
-                  className="inline-flex h-10 items-center justify-center rounded-md border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="grid size-9 shrink-0 place-items-center rounded-md text-slate-500 transition hover:bg-slate-100 hover:text-slate-950"
+                  aria-label="Tutup form tambah lamaran"
                 >
-                  Batal
-                </button>
-
-                <button
-                  type="submit"
-                  disabled={isCreatingApplication || companies.length === 0}
-                  className="inline-flex h-10 items-center justify-center rounded-md bg-blue-500 px-4 text-sm font-semibold text-white transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {isCreatingApplication ? "Menyimpan..." : "Simpan Lamaran"}
+                  <X size={18} />
                 </button>
               </div>
-            </form>
+
+              <form
+                onSubmit={createApplication}
+                className="min-h-0 flex-1 overflow-y-auto px-5 py-5"
+              >
+                <div className="grid gap-4">
+                  {createApplicationError ? (
+                    <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                      {createApplicationError}
+                    </div>
+                  ) : null}
+
+                  <details className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                    <summary className="cursor-pointer text-sm font-semibold text-slate-950">
+                      Tambah Perusahaan Baru
+                    </summary>
+
+                    <div className="mt-3 grid gap-3">
+                      <p className="text-xs leading-5 text-slate-600">
+                        Jika perusahaan belum tersedia di pilihan, tambahkan data
+                        perusahaan terlebih dahulu.
+                      </p>
+
+                      {createCompanyError ? (
+                        <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                          {createCompanyError}
+                        </div>
+                      ) : null}
+
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <label className="grid gap-1.5 text-sm">
+                          <span className="font-medium text-slate-700">
+                            Nama Perusahaan
+                          </span>
+                          <input
+                            value={createCompanyForm.companyName}
+                            onChange={(event) =>
+                              updateCreateCompanyForm({
+                                companyName: event.target.value,
+                              })
+                            }
+                            onKeyDown={(event) => {
+                              if (event.key === "Enter") {
+                                event.preventDefault();
+                                void createCompany();
+                              }
+                            }}
+                            placeholder="Contoh: Tokopedia"
+                            className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-blue-400"
+                          />
+                        </label>
+
+                        <label className="grid gap-1.5 text-sm">
+                          <span className="font-medium text-slate-700">
+                            Website
+                          </span>
+                          <input
+                            value={createCompanyForm.website}
+                            onChange={(event) =>
+                              updateCreateCompanyForm({
+                                website: event.target.value,
+                              })
+                            }
+                            placeholder="Contoh: https://tokopedia.com"
+                            className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-blue-400"
+                          />
+                        </label>
+
+                        <label className="grid gap-1.5 text-sm">
+                          <span className="font-medium text-slate-700">
+                            Industri
+                          </span>
+                          <input
+                            value={createCompanyForm.industry}
+                            onChange={(event) =>
+                              updateCreateCompanyForm({
+                                industry: event.target.value,
+                              })
+                            }
+                            placeholder="Contoh: Teknologi"
+                            className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-blue-400"
+                          />
+                        </label>
+
+                        <label className="grid gap-1.5 text-sm">
+                          <span className="font-medium text-slate-700">Lokasi</span>
+                          <input
+                            value={createCompanyForm.location}
+                            onChange={(event) =>
+                              updateCreateCompanyForm({
+                                location: event.target.value,
+                              })
+                            }
+                            placeholder="Contoh: Jakarta"
+                            className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-blue-400"
+                          />
+                        </label>
+
+                        <label className="grid gap-1.5 text-sm sm:col-span-2">
+                          <span className="font-medium text-slate-700">Kontak</span>
+                          <input
+                            value={createCompanyForm.contact}
+                            onChange={(event) =>
+                              updateCreateCompanyForm({
+                                contact: event.target.value,
+                              })
+                            }
+                            placeholder="Contoh: HRD atau email perusahaan"
+                            className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-blue-400"
+                          />
+                        </label>
+                      </div>
+
+                      <div className="flex justify-end">
+                        <button
+                          type="button"
+                          onClick={createCompany}
+                          disabled={isCreatingCompany}
+                          className="inline-flex h-10 items-center justify-center rounded-md border border-blue-200 bg-blue-50 px-4 text-sm font-semibold text-blue-700 transition hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {isCreatingCompany
+                            ? "Menambahkan..."
+                            : "Tambah Perusahaan"}
+                        </button>
+                      </div>
+                    </div>
+                  </details>
+
+                  {companies.length === 0 ? (
+                    <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700">
+                      Belum ada data perusahaan. Tambahkan perusahaan terlebih dahulu
+                      sebelum membuat lamaran.
+                    </div>
+                  ) : null}
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <label className="grid gap-1.5 text-sm">
+                      <span className="font-medium text-slate-700">Perusahaan</span>
+                      <select
+                        value={createForm.companyId}
+                        onChange={(event) =>
+                          updateCreateForm({ companyId: event.target.value })
+                        }
+                        disabled={companies.length === 0}
+                        className="h-10 rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none transition [color-scheme:light] focus:border-blue-400 focus:bg-white"
+                      >
+                        {companies.length === 0 ? (
+                          <option value="">Belum ada perusahaan</option>
+                        ) : null}
+
+                        {companies.map((company) => (
+                          <option
+                            key={company.company_id}
+                            value={company.company_id}
+                          >
+                            {company.company_name}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    <label className="grid gap-1.5 text-sm">
+                      <span className="font-medium text-slate-700">Posisi</span>
+                      <input
+                        value={createForm.position}
+                        onChange={(event) =>
+                          updateCreateForm({ position: event.target.value })
+                        }
+                        placeholder="Contoh: Frontend Developer"
+                        className="h-10 rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:bg-white"
+                      />
+                    </label>
+
+                    <label className="grid gap-1.5 text-sm">
+                      <span className="font-medium text-slate-700">Status</span>
+                      <select
+                        value={createForm.status}
+                        onChange={(event) =>
+                          updateCreateForm({
+                            status: event.target.value as ApplicationStatus,
+                          })
+                        }
+                        className="h-10 rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none transition [color-scheme:light] focus:border-blue-400 focus:bg-white"
+                      >
+                        {statusOptions.map((status) => (
+                          <option key={status} value={status}>
+                            {statusMeta[status].label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    <label className="grid gap-1.5 text-sm">
+                      <span className="font-medium text-slate-700">
+                        Tanggal Lamaran
+                      </span>
+                      <input
+                        type="date"
+                        value={createForm.applicationDate}
+                        onChange={(event) =>
+                          updateCreateForm({
+                            applicationDate: event.target.value,
+                          })
+                        }
+                        className="h-10 rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none transition [color-scheme:light] focus:border-blue-400 focus:bg-white"
+                      />
+                    </label>
+
+                    <label className="grid gap-1.5 text-sm">
+                      <span className="font-medium text-slate-700">Gaji</span>
+                      <input
+                        type="number"
+                        min="0"
+                        value={createForm.salary}
+                        onChange={(event) =>
+                          updateCreateForm({ salary: event.target.value })
+                        }
+                        placeholder="Contoh: 8000000"
+                        className="h-10 rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:bg-white"
+                      />
+                    </label>
+
+                    <label className="grid gap-1.5 text-sm">
+                      <span className="font-medium text-slate-700">
+                        Jenis Kerja
+                      </span>
+                      <select
+                        value={createForm.jobType}
+                        onChange={(event) =>
+                          updateCreateForm({
+                            jobType: event.target.value as JobType,
+                          })
+                        }
+                        className="h-10 rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none transition [color-scheme:light] focus:border-blue-400 focus:bg-white"
+                      >
+                        {jobTypeOptions.map((jobType) => (
+                          <option key={jobType} value={jobType}>
+                            {jobType}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    <label className="grid gap-1.5 text-sm sm:col-span-2">
+                      <span className="font-medium text-slate-700">Sumber</span>
+                      <input
+                        value={createForm.source}
+                        onChange={(event) =>
+                          updateCreateForm({ source: event.target.value })
+                        }
+                        placeholder="Contoh: LinkedIn, Glints, JobStreet"
+                        className="h-10 rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:bg-white"
+                      />
+                    </label>
+                  </div>
+
+                  <div className="flex flex-col-reverse gap-2 border-t border-slate-200 pt-4 sm:flex-row sm:justify-end">
+                    <button
+                      type="button"
+                      onClick={closeCreateModal}
+                      disabled={isCreatingApplication || isCreatingCompany}
+                      className="inline-flex h-10 items-center justify-center rounded-md border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      Batal
+                    </button>
+
+                    <button
+                      type="submit"
+                      disabled={
+                        isCreatingApplication ||
+                        isCreatingCompany ||
+                        companies.length === 0
+                      }
+                      className="inline-flex h-10 items-center justify-center rounded-md bg-blue-500 px-4 text-sm font-semibold text-white transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {isCreatingApplication ? "Menyimpan..." : "Simpan Lamaran"}
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       ) : null}
