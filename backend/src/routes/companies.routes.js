@@ -6,8 +6,11 @@ import {
     updateCompany,
     deleteCompany,
 } from "../controllers/companies.controller.js";
+import { verifyToken } from "../middleware/auth.middleware.js";
 
 const router = Router();
+
+router.use(verifyToken);
 
 router.get("/", getCompanies);
 router.get("/:id", getCompanyById);

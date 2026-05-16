@@ -17,19 +17,88 @@ import {
   filterApplications,
   getSummaryStats,
 } from "@/lib/applications/analytics";
-import { defaultApplications } from "@/lib/applications/sample-data";
-import type { DashboardFilters, JobApplication } from "@/lib/applications/types";
+import type {
+  ApplicationStatus,
+  DashboardFilters,
+  JobApplication,
+} from "@/lib/applications/types";
 import { FilterBar } from "./filter-bar";
 
-const storageKey = "applytics-applications";
+const tokenKey = "applytics-token";
 const userKey = "applytics-user";
 
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api";
+
+type BackendApplication = {
+  application_id: string;
+  company_id: string;
+  company_name: string;
+  position: string;
+  status: string;
+  application_date: string;
+  salary: number | string | null;
+  job_type: string | null;
+  source: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+const validStatuses: ApplicationStatus[] = [
+  "Applied",
+  "Rejected",
+  "Interviewed",
+  "Accepted",
+  "Offer",
+];
+
+function normalizeStatus(status: string): ApplicationStatus {
+  if (validStatuses.includes(status as ApplicationStatus)) {
+    return status as ApplicationStatus;
+  }
+
+  return "Applied";
+}
+
+function formatDateForInput(value: string) {
+  if (!value) {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+function mapBackendApplication(application: BackendApplication): JobApplication {
+  return {
+    id: application.application_id,
+    company: application.company_name,
+    position: application.position,
+    status: normalizeStatus(application.status),
+    applicationDate: formatDateForInput(application.application_date),
+    salary: Number(application.salary ?? 0),
+    nextAction: ["Waiting"],
+    website: application.source || "-",
+    contact: application.job_type || "-",
+  };
+}
+
 export function DashboardShell() {
-  const [applications, setApplications] =
-    useState<JobApplication[]>(defaultApplications);
+  const [applications, setApplications] = useState<JobApplication[]>([]);
   const [query, setQuery] = useState("");
   const [username, setUsername] = useState("Job Hunter");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isLoadingApplications, setIsLoadingApplications] = useState(true);
+  const [applicationsError, setApplicationsError] = useState("");
   const [filters, setFilters] = useState<DashboardFilters>({
     status: "All",
     analytics: "Overview",
@@ -37,29 +106,56 @@ export function DashboardShell() {
   });
 
   useEffect(() => {
-    const frame = window.requestAnimationFrame(() => {
-      try {
-        const storedApplications = window.localStorage.getItem(storageKey);
-        const storedUser = window.localStorage.getItem(userKey);
+    const storedUser = window.localStorage.getItem(userKey);
 
-        if (storedApplications) {
-          setApplications(JSON.parse(storedApplications));
-        }
-
-        if (storedUser) {
-          setUsername(storedUser);
-        }
-      } catch {
-        setApplications(defaultApplications);
-      }
-    });
-
-    return () => window.cancelAnimationFrame(frame);
+    if (storedUser) {
+      setUsername(storedUser);
+    }
   }, []);
 
   useEffect(() => {
-    window.localStorage.setItem(storageKey, JSON.stringify(applications));
-  }, [applications]);
+    const fetchApplications = async () => {
+      try {
+        setIsLoadingApplications(true);
+        setApplicationsError("");
+
+        const token = window.localStorage.getItem(tokenKey);
+
+        if (!token) {
+          setApplicationsError("Sesi login tidak ditemukan. Silakan login ulang.");
+          setApplications([]);
+          return;
+        }
+
+        const response = await fetch(`${API_BASE_URL}/applications`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            data?.message || "Gagal mengambil data lamaran dari server.",
+          );
+        }
+
+        setApplications(data.map(mapBackendApplication));
+      } catch (error) {
+        setApplications([]);
+        setApplicationsError(
+          error instanceof Error
+            ? error.message
+            : "Gagal mengambil data lamaran dari server.",
+        );
+      } finally {
+        setIsLoadingApplications(false);
+      }
+    };
+
+    fetchApplications();
+  }, []);
 
   const filteredApplications = useMemo(() => {
     const filtered = filterApplications(applications, filters);
@@ -98,8 +194,8 @@ export function DashboardShell() {
         applicationDate: new Date().toISOString().slice(0, 10),
         salary: 0,
         nextAction: ["Waiting"],
-        website: "https://",
-        contact: "kontak@example.com",
+        website: "LinkedIn",
+        contact: "Full-time",
       },
       ...current,
     ]);
@@ -156,6 +252,27 @@ export function DashboardShell() {
               </span>
             </div>
           </section>
+
+          {isLoadingApplications ? (
+            <div className="rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-600 shadow-sm">
+              Memuat data lamaran...
+            </div>
+          ) : null}
+
+          {applicationsError ? (
+            <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 shadow-sm">
+              {applicationsError}
+            </div>
+          ) : null}
+
+          {!isLoadingApplications &&
+          !applicationsError &&
+          applications.length === 0 ? (
+            <div className="rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-600 shadow-sm">
+              Belum ada data lamaran. Tambahkan lamaran pertama Anda untuk
+              mulai memantau progres.
+            </div>
+          ) : null}
 
           <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
             <MetricCard

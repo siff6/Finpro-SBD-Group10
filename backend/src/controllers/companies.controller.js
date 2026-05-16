@@ -1,15 +1,34 @@
 import { query } from "../config/db.js";
 
+const getUserIdFromToken = (req) => {
+    return req.user?.user_id || req.user?.id || req.user?.sub;
+};
+
 const getCompanies = async (req, res, next) => {
     try {
-        const userId = req.query.user_id;
+        const userId = getUserIdFromToken(req);
 
         if (!userId) {
-            return res.status(400).json({ message: "user_id is required" });
+            return res.status(401).json({
+                message: "Sesi login tidak valid. Silakan login ulang.",
+            });
         }
 
         const result = await query(
-            "select * from companies where user_id = $1 order by created_at desc",
+            `
+            select
+                company_id,
+                user_id,
+                company_name,
+                website,
+                industry,
+                location,
+                contact,
+                created_at
+            from companies
+            where user_id = $1
+            order by created_at desc
+            `,
             [userId]
         );
 
@@ -21,20 +40,36 @@ const getCompanies = async (req, res, next) => {
 
 const getCompanyById = async (req, res, next) => {
     try {
-        const userId = req.query.user_id;
+        const userId = getUserIdFromToken(req);
         const { id } = req.params;
 
         if (!userId) {
-            return res.status(400).json({ message: "user_id is required" });
+            return res.status(401).json({
+                message: "Sesi login tidak valid. Silakan login ulang.",
+            });
         }
 
         const result = await query(
-            "select * from companies where company_id = $1 and user_id = $2",
+            `
+            select
+                company_id,
+                user_id,
+                company_name,
+                website,
+                industry,
+                location,
+                contact,
+                created_at
+            from companies
+            where company_id = $1 and user_id = $2
+            `,
             [id, userId]
         );
 
         if (result.rows.length === 0) {
-            return res.status(404).json({ message: "Company not found" });
+            return res.status(404).json({
+                message: "Perusahaan tidak ditemukan.",
+            });
         }
 
         return res.json(result.rows[0]);
@@ -45,8 +80,15 @@ const getCompanyById = async (req, res, next) => {
 
 const createCompany = async (req, res, next) => {
     try {
+        const userId = getUserIdFromToken(req);
+
+        if (!userId) {
+            return res.status(401).json({
+                message: "Sesi login tidak valid. Silakan login ulang.",
+            });
+        }
+
         const {
-            user_id: userId,
             company_name: companyName,
             website,
             industry,
@@ -54,15 +96,28 @@ const createCompany = async (req, res, next) => {
             contact,
         } = req.body;
 
-        // TODO: user_id should come from auth middleware/JWT.
-        if (!userId || !companyName) {
-            return res
-                .status(400)
-                .json({ message: "user_id and company_name are required" });
+        if (!companyName) {
+            return res.status(400).json({
+                message: "Nama perusahaan wajib diisi.",
+            });
         }
 
         const result = await query(
-            "insert into companies (user_id, company_name, website, industry, location, contact) values ($1, $2, $3, $4, $5, $6) returning *",
+            `
+            insert into companies
+                (user_id, company_name, website, industry, location, contact)
+            values
+                ($1, $2, $3, $4, $5, $6)
+            returning
+                company_id,
+                user_id,
+                company_name,
+                website,
+                industry,
+                location,
+                contact,
+                created_at
+            `,
             [
                 userId,
                 companyName,
@@ -81,9 +136,16 @@ const createCompany = async (req, res, next) => {
 
 const updateCompany = async (req, res, next) => {
     try {
+        const userId = getUserIdFromToken(req);
         const { id } = req.params;
+
+        if (!userId) {
+            return res.status(401).json({
+                message: "Sesi login tidak valid. Silakan login ulang.",
+            });
+        }
+
         const {
-            user_id: userId,
             company_name: companyName,
             website,
             industry,
@@ -91,24 +153,43 @@ const updateCompany = async (req, res, next) => {
             contact,
         } = req.body;
 
-        // TODO: user_id should come from auth middleware/JWT.
-        if (!userId) {
-            return res.status(400).json({ message: "user_id is required" });
-        }
-
         const existingResult = await query(
-            "select * from companies where company_id = $1 and user_id = $2",
+            `
+            select *
+            from companies
+            where company_id = $1 and user_id = $2
+            `,
             [id, userId]
         );
 
         if (existingResult.rows.length === 0) {
-            return res.status(404).json({ message: "Company not found" });
+            return res.status(404).json({
+                message: "Perusahaan tidak ditemukan.",
+            });
         }
 
         const existing = existingResult.rows[0];
 
         const result = await query(
-            "update companies set company_name = $1, website = $2, industry = $3, location = $4, contact = $5 where company_id = $6 and user_id = $7 returning *",
+            `
+            update companies
+            set
+                company_name = $1,
+                website = $2,
+                industry = $3,
+                location = $4,
+                contact = $5
+            where company_id = $6 and user_id = $7
+            returning
+                company_id,
+                user_id,
+                company_name,
+                website,
+                industry,
+                location,
+                contact,
+                created_at
+            `,
             [
                 companyName ?? existing.company_name,
                 website ?? existing.website,
@@ -128,23 +209,33 @@ const updateCompany = async (req, res, next) => {
 
 const deleteCompany = async (req, res, next) => {
     try {
+        const userId = getUserIdFromToken(req);
         const { id } = req.params;
-        const userId = req.query.user_id;
 
         if (!userId) {
-            return res.status(400).json({ message: "user_id is required" });
+            return res.status(401).json({
+                message: "Sesi login tidak valid. Silakan login ulang.",
+            });
         }
 
         const result = await query(
-            "delete from companies where company_id = $1 and user_id = $2 returning *",
+            `
+            delete from companies
+            where company_id = $1 and user_id = $2
+            returning *
+            `,
             [id, userId]
         );
 
         if (result.rows.length === 0) {
-            return res.status(404).json({ message: "Company not found" });
+            return res.status(404).json({
+                message: "Perusahaan tidak ditemukan.",
+            });
         }
 
-        return res.json({ message: "Company deleted" });
+        return res.json({
+            message: "Perusahaan berhasil dihapus.",
+        });
     } catch (err) {
         return next(err);
     }
