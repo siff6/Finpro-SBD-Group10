@@ -79,7 +79,7 @@ create table public.job_applications (
 
   application_date date not null default current_date,
 
-  salary integer not null default 0
+  salary bigint not null default 0
     check (salary >= 0),
 
   job_type text not null default 'Full-time'

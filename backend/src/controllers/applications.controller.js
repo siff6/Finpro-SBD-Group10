@@ -1,6 +1,40 @@
 import { query } from "../config/db.js";
 import { invalidateDashboardCache } from "../services/cache.service.js";
 
+const MAX_SALARY = 999_999_999_999_999;
+
+const parseSalary = (salary) => {
+  const salaryNumber = Number(salary ?? 0);
+
+  if (!Number.isFinite(salaryNumber)) {
+    return {
+      error: "Gaji harus berupa angka.",
+    };
+  }
+
+  if (!Number.isSafeInteger(salaryNumber)) {
+    return {
+      error: "Gaji harus berupa angka bulat yang valid.",
+    };
+  }
+
+  if (salaryNumber < 0) {
+    return {
+      error: "Gaji tidak boleh kurang dari 0.",
+    };
+  }
+
+  if (salaryNumber > MAX_SALARY) {
+    return {
+      error: "Gaji terlalu besar.",
+    };
+  }
+
+  return {
+    value: salaryNumber,
+  };
+};
+
 const allowedJobTypes = [
     "Full-time",
     "Part-time",
@@ -159,6 +193,14 @@ const createApplication = async (req, res, next) => {
             });
         }
 
+        const parsedSalary = parseSalary(salary);
+
+        if (parsedSalary.error) {
+            return res.status(400).json({
+                message: parsedSalary.error,
+            });
+        }
+
         const result = await query(
             `
             insert into job_applications
@@ -173,7 +215,7 @@ const createApplication = async (req, res, next) => {
                 position,
                 status || "Applied",
                 applicationDate || new Date(),
-                salary ?? 0,
+                parsedSalary.value,
                 jobType || "Full-time",
                 source || null,
             ]
@@ -241,6 +283,14 @@ const updateApplication = async (req, res, next) => {
 
         const oldStatus = existingResult.rows[0].status;
 
+        const parsedSalary = parseSalary(salary);
+
+        if (parsedSalary.error) {
+            return res.status(400).json({
+                message: parsedSalary.error,
+            });
+        }
+
         const updateResult = await query(
             `
             update job_applications
@@ -261,7 +311,7 @@ const updateApplication = async (req, res, next) => {
                 position,
                 status,
                 applicationDate,
-                salary,
+                parsedSalary.value,
                 jobType,
                 source,
                 id,
