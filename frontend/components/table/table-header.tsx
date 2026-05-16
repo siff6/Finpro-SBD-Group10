@@ -5,8 +5,8 @@ const columns = [
   { label: "Tanggal Lamaran", className: "w-[11%]" },
   { label: "Gaji", className: "w-[8%]" },
   { label: "Tindakan Berikutnya", className: "w-[15%]" },
-  { label: "Website", className: "w-[12%]" },
-  { label: "Kontak", className: "w-[11%]" },
+  { label: "Sumber", className: "w-[12%]" },
+  { label: "Jenis Kerja", className: "w-[11%]" },
   { label: "", className: "w-[5%]" },
 ];
 

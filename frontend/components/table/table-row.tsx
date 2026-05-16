@@ -68,8 +68,7 @@ export function TableRow({ application, onChange, onDelete }: TableRowProps) {
 
       <td className="border-b border-slate-100 px-3 py-2">
         <EditableCell
-          label="Website"
-          type="url"
+          label="Sumber"
           value={application.website}
           onChange={(website) => onChange(application.id, { website })}
         />
@@ -77,8 +76,7 @@ export function TableRow({ application, onChange, onDelete }: TableRowProps) {
 
       <td className="border-b border-slate-100 px-3 py-2">
         <EditableCell
-          label="Kontak"
-          type="email"
+          label="Jenis kerja"
           value={application.contact}
           onChange={(contact) => onChange(application.id, { contact })}
         />

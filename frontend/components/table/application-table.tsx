@@ -36,7 +36,7 @@ export function ApplicationTable({
             Daftar Lamaran
           </h2>
           <p className="mt-1 text-sm text-slate-600">
-            Kelola data lamaran kerja, status, tanggal, sumber, dan informasi terkait.
+            Kelola data lamaran kerja, status, tanggal, gaji, sumber, dan jenis kerja.
           </p>
         </div>
 
