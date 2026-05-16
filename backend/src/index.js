@@ -8,6 +8,7 @@ import remindersRoutes from "./routes/reminders.routes.js";
 import notesRoutes from "./routes/notes.routes.js";
 import statusHistoryRoutes from "./routes/statusHistory.routes.js";
 import errorHandler from "./middleware/errorHandler.js";
+import authRoutes from "./routes/auth.routes.js";
 import { testConnection } from "./config/db.js";
 import { connectRedis } from "./config/redis.js";
 
@@ -27,6 +28,7 @@ app.use("/api/applications", applicationsRoutes);
 app.use("/api/companies", companiesRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/reminders", remindersRoutes);
+app.use("/api/auth", authRoutes);
 app.use("/api", notesRoutes);
 app.use("/api", statusHistoryRoutes);
 

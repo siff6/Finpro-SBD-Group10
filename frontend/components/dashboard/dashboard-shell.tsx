@@ -119,8 +119,7 @@ export function DashboardShell() {
       <div className="flex-1 min-w-0">
       {/* <div className="min-w-0"> */}
         <DashboardTopbar 
-          username={username} 
-          onLogin={login} 
+          username={username}
           toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} 
         />
 
