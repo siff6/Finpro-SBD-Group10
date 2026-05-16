@@ -22,8 +22,13 @@ import type {
   ApplicationStatus,
   DashboardFilters,
   JobApplication,
+  JobType,
 } from "@/lib/applications/types";
-import { statusMeta, statusOptions } from "@/lib/applications/types";
+import {
+  jobTypeOptions,
+  statusMeta,
+  statusOptions,
+} from "@/lib/applications/types";
 import { FilterBar } from "./filter-bar";
 
 const tokenKey = "applytics-token";
@@ -62,19 +67,11 @@ type CreateApplicationForm = {
   status: ApplicationStatus;
   applicationDate: string;
   salary: string;
-  jobType: string;
+  jobType: JobType;
   source: string;
 };
 
 const validStatuses: ApplicationStatus[] = statusOptions;
-
-const jobTypeOptions = [
-  "Full-time",
-  "Part-time",
-  "Internship",
-  "Contract",
-  "Freelance",
-] as const;
 
 function normalizeStatus(status: string): ApplicationStatus {
   if (validStatuses.includes(status as ApplicationStatus)) {
@@ -82,6 +79,14 @@ function normalizeStatus(status: string): ApplicationStatus {
   }
 
   return "Applied";
+}
+
+function normalizeJobType(jobType: string | null): JobType {
+  if (jobTypeOptions.includes(jobType as JobType)) {
+    return jobType as JobType;
+  }
+
+  return "Full-time";
 }
 
 function formatDateForInput(value: string) {
@@ -124,8 +129,8 @@ function mapBackendApplication(application: BackendApplication): JobApplication 
     applicationDate: formatDateForInput(application.application_date),
     salary: Number(application.salary ?? 0),
     nextAction: ["Waiting"],
-    website: application.source || "-",
-    contact: application.job_type || "-",
+    source: application.source || "-",
+    jobType: normalizeJobType(application.job_type),
   };
 }
 
@@ -136,8 +141,8 @@ function createUpdatePayload(application: JobApplication) {
     status: application.status,
     application_date: application.applicationDate,
     salary: Number(application.salary || 0),
-    job_type: application.contact,
-    source: application.website === "-" ? null : application.website,
+    job_type: application.jobType,
+    source: application.source === "-" ? null : application.source,
   };
 }
 
@@ -255,8 +260,8 @@ export function DashboardShell() {
         application.company,
         application.position,
         application.status,
-        application.website,
-        application.contact,
+        application.source,
+        application.jobType,
       ]
         .join(" ")
         .toLowerCase()
@@ -327,7 +332,7 @@ export function DashboardShell() {
           status: createForm.status,
           application_date: createForm.applicationDate,
           salary: Number(createForm.salary || 0),
-          job_type: createForm.jobType.trim() || "Full-time",
+          job_type: createForm.jobType,
           source: createForm.source.trim() || null,
         }),
       });
@@ -709,7 +714,7 @@ export function DashboardShell() {
                   <select
                     value={createForm.jobType}
                     onChange={(event) =>
-                      updateCreateForm({ jobType: event.target.value })
+                      updateCreateForm({ jobType: event.target.value as JobType })
                     }
                     className="h-10 rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none transition [color-scheme:light] focus:border-blue-400 focus:bg-white"
                   >

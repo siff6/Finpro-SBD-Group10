@@ -7,6 +7,13 @@ export type ApplicationStatus =
   | "Offer"
   | "Withdrawn";
 
+export type JobType =
+  | "Internship"
+  | "Full-time"
+  | "Part-time"
+  | "Contract"
+  | "Freelance";
+
 export type NextAction =
   | "Follow up"
   | "Waiting"
@@ -23,8 +30,8 @@ export type JobApplication = {
   applicationDate: string;
   salary: number;
   nextAction: NextAction[];
-  website: string;
-  contact: string;
+  source: string;
+  jobType: JobType;
 };
 
 export type DashboardFilters = {
@@ -41,6 +48,14 @@ export const statusOptions: ApplicationStatus[] = [
   "Accepted",
   "Rejected",
   "Withdrawn",
+];
+
+export const jobTypeOptions: JobType[] = [
+  "Internship",
+  "Full-time",
+  "Part-time",
+  "Contract",
+  "Freelance",
 ];
 
 export const nextActionOptions: NextAction[] = [

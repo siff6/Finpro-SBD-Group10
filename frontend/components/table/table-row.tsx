@@ -1,7 +1,8 @@
 "use client";
 
 import { Trash2 } from "lucide-react";
-import type { JobApplication } from "@/lib/applications/types";
+import type { JobApplication, JobType } from "@/lib/applications/types";
+import { jobTypeOptions } from "@/lib/applications/types";
 import { DatePickerCell } from "./date-picker-cell";
 import { EditableCell } from "./editable-cell";
 import { MultiSelectDropdown } from "./multi-select-dropdown";
@@ -69,17 +70,28 @@ export function TableRow({ application, onChange, onDelete }: TableRowProps) {
       <td className="border-b border-slate-100 px-3 py-2">
         <EditableCell
           label="Sumber"
-          value={application.website}
-          onChange={(website) => onChange(application.id, { website })}
+          value={application.source}
+          onChange={(source) => onChange(application.id, { source })}
         />
       </td>
 
       <td className="border-b border-slate-100 px-3 py-2">
-        <EditableCell
-          label="Jenis kerja"
-          value={application.contact}
-          onChange={(contact) => onChange(application.id, { contact })}
-        />
+        <select
+          aria-label="Jenis kerja"
+          value={application.jobType}
+          onChange={(event) =>
+            onChange(application.id, {
+              jobType: event.target.value as JobType,
+            })
+          }
+          className="h-10 w-full min-w-0 truncate rounded-md border border-transparent bg-transparent px-2 text-sm text-slate-700 outline-none transition [color-scheme:light] hover:bg-slate-100 focus:border-blue-400 focus:bg-white focus:text-slate-950"
+        >
+          {jobTypeOptions.map((jobType) => (
+            <option key={jobType} value={jobType}>
+              {jobType}
+            </option>
+          ))}
+        </select>
       </td>
 
       <td className="border-b border-slate-100 px-2 py-2">
