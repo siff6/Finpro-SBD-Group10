@@ -1,9 +1,11 @@
 export type ApplicationStatus =
   | "Applied"
+  | "Screening"
   | "Rejected"
   | "Interviewed"
   | "Accepted"
-  | "Offer";
+  | "Offer"
+  | "Withdrawn";
 
 export type NextAction =
   | "Follow up"
@@ -32,10 +34,12 @@ export type DashboardFilters = {
 
 export const statusOptions: ApplicationStatus[] = [
   "Applied",
-  "Rejected",
+  "Screening",
   "Interviewed",
-  "Accepted",
   "Offer",
+  "Accepted",
+  "Rejected",
+  "Withdrawn",
 ];
 
 export const nextActionOptions: NextAction[] = [
@@ -57,12 +61,12 @@ export const statusMeta: Record<
     bg: "bg-blue-50 border-blue-200",
     chart: "#60a5fa",
   },
-  Rejected: {
-    dot: "bg-red-500",
-    label: "Ditolak",
-    text: "text-red-700",
-    bg: "bg-red-50 border-red-200",
-    chart: "#f87171",
+  Screening: {
+    dot: "bg-cyan-500",
+    label: "Screening",
+    text: "text-cyan-700",
+    bg: "bg-cyan-50 border-cyan-200",
+    chart: "#22d3ee",
   },
   Interviewed: {
     dot: "bg-amber-500",
@@ -71,6 +75,13 @@ export const statusMeta: Record<
     bg: "bg-amber-50 border-amber-200",
     chart: "#facc15",
   },
+  Offer: {
+    dot: "bg-violet-500",
+    label: "Penawaran",
+    text: "text-violet-700",
+    bg: "bg-violet-50 border-violet-200",
+    chart: "#c084fc",
+  },
   Accepted: {
     dot: "bg-emerald-500",
     label: "Diterima",
@@ -78,12 +89,19 @@ export const statusMeta: Record<
     bg: "bg-emerald-50 border-emerald-200",
     chart: "#4ade80",
   },
-  Offer: {
-    dot: "bg-violet-500",
-    label: "Penawaran",
-    text: "text-violet-700",
-    bg: "bg-violet-50 border-violet-200",
-    chart: "#c084fc",
+  Rejected: {
+    dot: "bg-red-500",
+    label: "Ditolak",
+    text: "text-red-700",
+    bg: "bg-red-50 border-red-200",
+    chart: "#f87171",
+  },
+  Withdrawn: {
+    dot: "bg-slate-500",
+    label: "Dibatalkan",
+    text: "text-slate-700",
+    bg: "bg-slate-100 border-slate-200",
+    chart: "#94a3b8",
   },
 };
 

@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   BarChart3,
   BriefcaseBusiness,
   CheckCircle2,
   Clock3,
   Send,
+  X,
 } from "lucide-react";
 import { ApplicationCharts } from "@/components/charts/application-charts";
 import { DashboardSidebar } from "@/components/layout/dashboard-sidebar";
@@ -22,6 +23,7 @@ import type {
   DashboardFilters,
   JobApplication,
 } from "@/lib/applications/types";
+import { statusMeta, statusOptions } from "@/lib/applications/types";
 import { FilterBar } from "./filter-bar";
 
 const tokenKey = "applytics-token";
@@ -44,13 +46,35 @@ type BackendApplication = {
   updated_at: string;
 };
 
-const validStatuses: ApplicationStatus[] = [
-  "Applied",
-  "Rejected",
-  "Interviewed",
-  "Accepted",
-  "Offer",
-];
+type BackendCompany = {
+  company_id: string;
+  company_name: string;
+  website: string | null;
+  industry: string | null;
+  location: string | null;
+  contact: string | null;
+  created_at: string;
+};
+
+type CreateApplicationForm = {
+  companyId: string;
+  position: string;
+  status: ApplicationStatus;
+  applicationDate: string;
+  salary: string;
+  jobType: string;
+  source: string;
+};
+
+const validStatuses: ApplicationStatus[] = statusOptions;
+
+const jobTypeOptions = [
+  "Full-time",
+  "Part-time",
+  "Internship",
+  "Contract",
+  "Freelance",
+] as const;
 
 function normalizeStatus(status: string): ApplicationStatus {
   if (validStatuses.includes(status as ApplicationStatus)) {
@@ -78,6 +102,18 @@ function formatDateForInput(value: string) {
   return `${year}-${month}-${day}`;
 }
 
+function createInitialApplicationForm(): CreateApplicationForm {
+  return {
+    companyId: "",
+    position: "",
+    status: "Applied",
+    applicationDate: new Date().toISOString().slice(0, 10),
+    salary: "0",
+    jobType: "Full-time",
+    source: "LinkedIn",
+  };
+}
+
 function mapBackendApplication(application: BackendApplication): JobApplication {
   return {
     id: application.application_id,
@@ -94,16 +130,90 @@ function mapBackendApplication(application: BackendApplication): JobApplication 
 
 export function DashboardShell() {
   const [applications, setApplications] = useState<JobApplication[]>([]);
+  const [companies, setCompanies] = useState<BackendCompany[]>([]);
   const [query, setQuery] = useState("");
   const [username, setUsername] = useState("Job Hunter");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLoadingApplications, setIsLoadingApplications] = useState(true);
   const [applicationsError, setApplicationsError] = useState("");
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isCreatingApplication, setIsCreatingApplication] = useState(false);
+  const [createApplicationError, setCreateApplicationError] = useState("");
+  const [createForm, setCreateForm] = useState<CreateApplicationForm>(
+    createInitialApplicationForm,
+  );
   const [filters, setFilters] = useState<DashboardFilters>({
     status: "All",
     analytics: "Overview",
     dateRange: "All time",
   });
+
+  const fetchApplications = useCallback(async () => {
+    try {
+      setIsLoadingApplications(true);
+      setApplicationsError("");
+
+      const token = window.localStorage.getItem(tokenKey);
+
+      if (!token) {
+        setApplicationsError("Sesi login tidak ditemukan. Silakan login ulang.");
+        setApplications([]);
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/applications`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(
+          data?.message || "Gagal mengambil data lamaran dari server.",
+        );
+      }
+
+      setApplications(data.map(mapBackendApplication));
+    } catch (error) {
+      setApplications([]);
+      setApplicationsError(
+        error instanceof Error
+          ? error.message
+          : "Gagal mengambil data lamaran dari server.",
+      );
+    } finally {
+      setIsLoadingApplications(false);
+    }
+  }, []);
+
+  const fetchCompanies = useCallback(async () => {
+    try {
+      const token = window.localStorage.getItem(tokenKey);
+
+      if (!token) {
+        setCompanies([]);
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/companies`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(data?.message || "Gagal mengambil data perusahaan.");
+      }
+
+      setCompanies(data);
+    } catch {
+      setCompanies([]);
+    }
+  }, []);
 
   useEffect(() => {
     const storedUser = window.localStorage.getItem(userKey);
@@ -114,48 +224,9 @@ export function DashboardShell() {
   }, []);
 
   useEffect(() => {
-    const fetchApplications = async () => {
-      try {
-        setIsLoadingApplications(true);
-        setApplicationsError("");
-
-        const token = window.localStorage.getItem(tokenKey);
-
-        if (!token) {
-          setApplicationsError("Sesi login tidak ditemukan. Silakan login ulang.");
-          setApplications([]);
-          return;
-        }
-
-        const response = await fetch(`${API_BASE_URL}/applications`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(
-            data?.message || "Gagal mengambil data lamaran dari server.",
-          );
-        }
-
-        setApplications(data.map(mapBackendApplication));
-      } catch (error) {
-        setApplications([]);
-        setApplicationsError(
-          error instanceof Error
-            ? error.message
-            : "Gagal mengambil data lamaran dari server.",
-        );
-      } finally {
-        setIsLoadingApplications(false);
-      }
-    };
-
     fetchApplications();
-  }, []);
+    fetchCompanies();
+  }, [fetchApplications, fetchCompanies]);
 
   const filteredApplications = useMemo(() => {
     const filtered = filterApplications(applications, filters);
@@ -184,21 +255,88 @@ export function DashboardShell() {
     [filteredApplications],
   );
 
-  function addRow() {
-    setApplications((current) => [
-      {
-        id: `app-${Date.now()}`,
-        company: "Perusahaan Baru",
-        position: "Judul Posisi",
-        status: "Applied",
-        applicationDate: new Date().toISOString().slice(0, 10),
-        salary: 0,
-        nextAction: ["Waiting"],
-        website: "LinkedIn",
-        contact: "Full-time",
-      },
+  function openCreateModal() {
+    setCreateApplicationError("");
+    setCreateForm({
+      ...createInitialApplicationForm(),
+      companyId: companies[0]?.company_id || "",
+    });
+    setIsCreateModalOpen(true);
+  }
+
+  function closeCreateModal() {
+    if (isCreatingApplication) {
+      return;
+    }
+
+    setIsCreateModalOpen(false);
+    setCreateApplicationError("");
+  }
+
+  function updateCreateForm(patch: Partial<CreateApplicationForm>) {
+    setCreateForm((current) => ({
       ...current,
-    ]);
+      ...patch,
+    }));
+  }
+
+  async function createApplication(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    try {
+      setIsCreatingApplication(true);
+      setCreateApplicationError("");
+
+      const token = window.localStorage.getItem(tokenKey);
+
+      if (!token) {
+        throw new Error("Sesi login tidak ditemukan. Silakan login ulang.");
+      }
+
+      if (!createForm.companyId) {
+        throw new Error("Perusahaan wajib dipilih.");
+      }
+
+      if (!createForm.position.trim()) {
+        throw new Error("Posisi wajib diisi.");
+      }
+
+      const response = await fetch(`${API_BASE_URL}/applications`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          company_id: createForm.companyId,
+          position: createForm.position.trim(),
+          status: createForm.status,
+          application_date: createForm.applicationDate,
+          salary: Number(createForm.salary || 0),
+          job_type: createForm.jobType.trim() || "Full-time",
+          source: createForm.source.trim() || null,
+        }),
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(data?.message || "Gagal menambahkan lamaran.");
+      }
+
+      setIsCreateModalOpen(false);
+      setCreateForm(createInitialApplicationForm());
+
+      await fetchApplications();
+    } catch (error) {
+      setCreateApplicationError(
+        error instanceof Error
+          ? error.message
+          : "Gagal menambahkan lamaran.",
+      );
+    } finally {
+      setIsCreatingApplication(false);
+    }
   }
 
   function updateRow(id: string, patch: Partial<JobApplication>) {
@@ -317,7 +455,7 @@ export function DashboardShell() {
             applications={filteredApplications}
             query={query}
             onQueryChange={setQuery}
-            onAddRow={addRow}
+            onAddRow={openCreateModal}
             onChange={updateRow}
             onDelete={deleteRow}
           />
@@ -325,6 +463,185 @@ export function DashboardShell() {
           <ApplicationCharts applications={filteredApplications} />
         </main>
       </div>
+
+      {isCreateModalOpen ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/30 px-4 py-6 backdrop-blur-sm">
+          <div className="w-full max-w-2xl rounded-xl border border-slate-200 bg-white shadow-xl">
+            <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-5 py-4">
+              <div>
+                <h2 className="text-lg font-semibold text-slate-950">
+                  Tambah Lamaran
+                </h2>
+                <p className="mt-1 text-sm text-slate-600">
+                  Isi detail lamaran baru, lalu simpan ke database.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={closeCreateModal}
+                className="grid size-9 place-items-center rounded-md text-slate-500 transition hover:bg-slate-100 hover:text-slate-950"
+                aria-label="Tutup form tambah lamaran"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={createApplication} className="grid gap-4 px-5 py-5">
+              {createApplicationError ? (
+                <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                  {createApplicationError}
+                </div>
+              ) : null}
+
+              {companies.length === 0 ? (
+                <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700">
+                  Belum ada data perusahaan. Tambahkan perusahaan terlebih
+                  dahulu sebelum membuat lamaran.
+                </div>
+              ) : null}
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="grid gap-1.5 text-sm">
+                  <span className="font-medium text-slate-700">
+                    Perusahaan
+                  </span>
+                  <select
+                    value={createForm.companyId}
+                    onChange={(event) =>
+                      updateCreateForm({ companyId: event.target.value })
+                    }
+                    disabled={companies.length === 0}
+                    className="h-10 rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none transition [color-scheme:light] focus:border-blue-400 focus:bg-white"
+                  >
+                    {companies.length === 0 ? (
+                      <option value="">Belum ada perusahaan</option>
+                    ) : null}
+
+                    {companies.map((company) => (
+                      <option
+                        key={company.company_id}
+                        value={company.company_id}
+                      >
+                        {company.company_name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="grid gap-1.5 text-sm">
+                  <span className="font-medium text-slate-700">Posisi</span>
+                  <input
+                    value={createForm.position}
+                    onChange={(event) =>
+                      updateCreateForm({ position: event.target.value })
+                    }
+                    placeholder="Contoh: Frontend Developer"
+                    className="h-10 rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:bg-white"
+                  />
+                </label>
+
+                <label className="grid gap-1.5 text-sm">
+                  <span className="font-medium text-slate-700">Status</span>
+                  <select
+                    value={createForm.status}
+                    onChange={(event) =>
+                      updateCreateForm({
+                        status: event.target.value as ApplicationStatus,
+                      })
+                    }
+                    className="h-10 rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none transition [color-scheme:light] focus:border-blue-400 focus:bg-white"
+                  >
+                    {statusOptions.map((status) => (
+                      <option key={status} value={status}>
+                        {statusMeta[status].label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="grid gap-1.5 text-sm">
+                  <span className="font-medium text-slate-700">
+                    Tanggal Lamaran
+                  </span>
+                  <input
+                    type="date"
+                    value={createForm.applicationDate}
+                    onChange={(event) =>
+                      updateCreateForm({ applicationDate: event.target.value })
+                    }
+                    className="h-10 rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none transition [color-scheme:light] focus:border-blue-400 focus:bg-white"
+                  />
+                </label>
+
+                <label className="grid gap-1.5 text-sm">
+                  <span className="font-medium text-slate-700">Gaji</span>
+                  <input
+                    type="number"
+                    min="0"
+                    value={createForm.salary}
+                    onChange={(event) =>
+                      updateCreateForm({ salary: event.target.value })
+                    }
+                    placeholder="Contoh: 8000000"
+                    className="h-10 rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:bg-white"
+                  />
+                </label>
+
+                <label className="grid gap-1.5 text-sm">
+                  <span className="font-medium text-slate-700">
+                    Jenis Kerja
+                  </span>
+                  <select
+                    value={createForm.jobType}
+                    onChange={(event) =>
+                      updateCreateForm({ jobType: event.target.value })
+                    }
+                    className="h-10 rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none transition [color-scheme:light] focus:border-blue-400 focus:bg-white"
+                  >
+                    {jobTypeOptions.map((jobType) => (
+                      <option key={jobType} value={jobType}>
+                        {jobType}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="grid gap-1.5 text-sm sm:col-span-2">
+                  <span className="font-medium text-slate-700">Sumber</span>
+                  <input
+                    value={createForm.source}
+                    onChange={(event) =>
+                      updateCreateForm({ source: event.target.value })
+                    }
+                    placeholder="Contoh: LinkedIn, Glints, JobStreet"
+                    className="h-10 rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:bg-white"
+                  />
+                </label>
+              </div>
+
+              <div className="flex flex-col-reverse gap-2 border-t border-slate-200 pt-4 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  onClick={closeCreateModal}
+                  disabled={isCreatingApplication}
+                  className="inline-flex h-10 items-center justify-center rounded-md border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  Batal
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={isCreatingApplication || companies.length === 0}
+                  className="inline-flex h-10 items-center justify-center rounded-md bg-blue-500 px-4 text-sm font-semibold text-white transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isCreatingApplication ? "Menyimpan..." : "Simpan Lamaran"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

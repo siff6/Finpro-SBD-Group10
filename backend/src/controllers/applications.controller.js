@@ -1,6 +1,14 @@
 import { query } from "../config/db.js";
 import { invalidateDashboardCache } from "../services/cache.service.js";
 
+const allowedJobTypes = [
+    "Full-time",
+    "Part-time",
+    "Internship",
+    "Contract",
+    "Freelance",
+];
+
 const getUserIdFromToken = (req) => {
     return req.user?.user_id || req.user?.id || req.user?.sub;
 };
@@ -142,6 +150,12 @@ const createApplication = async (req, res, next) => {
         if (!companyId || !position) {
             return res.status(400).json({
                 message: "Perusahaan dan posisi wajib diisi.",
+            });
+        }
+
+        if (jobType && !allowedJobTypes.includes(jobType)) {
+            return res.status(400).json({
+                message: "Jenis kerja tidak valid.",
             });
         }
 
