@@ -43,6 +43,12 @@ Berikut adalah anggota tim pengembang Finpro SBD - Group 10:
 
 ---
 
+## Redis Caching
+
+Redis digunakan sebagai caching layer untuk menyimpan hasil dashboard analytics dan query statistik yang sering diakses. Dengan Redis, waktu response endpoint analytics menjadi lebih cepat dan mengurangi beban query PostgreSQL.
+
+---
+
 ## Fitur Utama
 
 - Register dan login user
@@ -237,3 +243,4 @@ http://localhost:3000
 ## Progress Report
 
 <img src="https://i.ibb.co.com/gb40kwdw/Screenshot-2026-05-15-184535.png" alt="Screenshot 2026 05 15 184535" border="0">
+<img width="811" height="733" alt="image" src="https://github.com/user-attachments/assets/7ffe05a8-8a48-4409-bc49-e315bb60fbfc" />
