@@ -27,6 +27,16 @@ create table public.users (
   username text not null,
   email text not null unique,
   password text not null,
+
+  is_verified boolean not null default false,
+  verification_code text,
+  verification_code_expires timestamptz,
+  verification_code_sent_at timestamptz,
+
+  reset_password_code text,
+  reset_password_expires timestamptz,
+  reset_password_sent_at timestamptz,
+
   created_at timestamptz not null default now()
 );
 
