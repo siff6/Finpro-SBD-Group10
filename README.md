@@ -41,6 +41,8 @@ Berikut adalah anggota tim pengembang Finpro SBD - Group 10:
 - PostgreSQL sebagai database utama
 - Redis sebagai database pendukung untuk cache dashboard analytics
 
+---
+
 ## Redis Caching
 
 Redis digunakan sebagai caching layer untuk menyimpan hasil dashboard analytics dan query statistik yang sering diakses. Dengan Redis, waktu response endpoint analytics menjadi lebih cepat dan mengurangi beban query PostgreSQL.
