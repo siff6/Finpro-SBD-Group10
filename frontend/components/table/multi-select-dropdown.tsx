@@ -7,13 +7,23 @@ type MultiSelectDropdownProps = {
   onChange: (value: NextAction[]) => void;
 };
 
-export function MultiSelectDropdown({ value, onChange }: MultiSelectDropdownProps) {
+export function MultiSelectDropdown({
+  value,
+  onChange,
+}: MultiSelectDropdownProps) {
   return (
     <input
-      aria-label="Next Action"
+      aria-label="Tindakan berikutnya"
       value={value.join(", ")}
-      onChange={(event) => onChange(event.target.value.split(",").map((v) => v.trim()) as NextAction[])}
-      className="h-10 w-full rounded-md border border-transparent bg-transparent px-2 text-sm text-zinc-100 outline-none transition [color-scheme:dark] hover:bg-white/[0.04] focus:border-blue-300/50 focus:bg-[#10141b]"
+      onChange={(event) =>
+        onChange(
+          event.target.value
+            .split(",")
+            .map((v) => v.trim())
+            .filter(Boolean) as NextAction[],
+        )
+      }
+      className="h-10 w-full rounded-md border border-transparent bg-transparent px-2 text-sm text-slate-700 outline-none transition [color-scheme:light] hover:bg-slate-100 focus:border-blue-400 focus:bg-white focus:text-slate-950"
     />
   );
 }

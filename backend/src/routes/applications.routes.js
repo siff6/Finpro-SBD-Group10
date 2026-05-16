@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { verifyToken } from "../middleware/auth.middleware.js";
 import {
     getApplications,
     getApplicationById,
@@ -9,10 +10,10 @@ import {
 
 const router = Router();
 
-router.get("/", getApplications);
-router.get("/:id", getApplicationById);
-router.post("/", createApplication);
-router.put("/:id", updateApplication);
-router.delete("/:id", deleteApplication);
+router.get("/", verifyToken, getApplications);
+router.get("/:id", verifyToken, getApplicationById);
+router.post("/", verifyToken, createApplication);
+router.put("/:id", verifyToken, updateApplication);
+router.delete("/:id", verifyToken, deleteApplication);
 
 export default router;

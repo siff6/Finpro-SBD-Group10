@@ -28,38 +28,42 @@ export function ApplicationTable({
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
-      className="rounded-lg border border-white/10 bg-white/[0.045] shadow-[0_20px_80px_rgba(0,0,0,0.18)]"
+      className="min-w-0 max-w-full overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm"
     >
-      <div className="flex flex-col gap-3 border-b border-white/10 p-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex min-w-0 flex-col gap-3 border-b border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-xl font-semibold text-white">Applications</h2>
-          <p className="mt-1 text-sm text-zinc-400">
-            Inline editing, select status, multi-select action, dan date picker.
+          <h2 className="text-xl font-semibold text-slate-950">
+            Daftar Lamaran
+          </h2>
+          <p className="mt-1 text-sm text-slate-600">
+            Kelola data lamaran kerja, status, tanggal, sumber, dan informasi terkait.
           </p>
         </div>
-        <div className="flex flex-col gap-2 sm:flex-row">
-          <label className="flex h-10 items-center gap-2 rounded-md border border-white/10 bg-black/20 px-3 text-zinc-400">
+
+        <div className="flex min-w-0 flex-col gap-2 sm:flex-row">
+          <label className="flex h-10 min-w-0 items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 text-slate-500 transition focus-within:border-blue-400 focus-within:bg-white">
             <Search size={16} />
             <input
-              aria-label="Search applications"
+              aria-label="Cari lamaran"
               value={query}
               onChange={(event) => onQueryChange(event.target.value)}
-              placeholder="Search table"
-              className="min-w-0 bg-transparent text-sm text-white outline-none placeholder:text-zinc-600"
+              placeholder="Cari lamaran"
+              className="min-w-0 bg-transparent text-sm text-slate-950 outline-none placeholder:text-slate-400"
             />
           </label>
+
           <button
             type="button"
             onClick={onAddRow}
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-blue-400 px-3 text-sm font-semibold text-black transition hover:bg-blue-300"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-blue-500 px-3 text-sm font-semibold text-white transition hover:bg-blue-600"
           >
             <Plus size={16} />
-            Add row
+            Tambah Lamaran
           </button>
         </div>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="w-full max-w-full overflow-x-auto">
         <table className="w-full min-w-[1280px] border-separate border-spacing-0">
           <TableHeader />
           <tbody>

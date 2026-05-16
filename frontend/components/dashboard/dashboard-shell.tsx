@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { BarChart3, BriefcaseBusiness, CheckCircle2, Clock3, Send } from "lucide-react";
+import {
+  BarChart3,
+  BriefcaseBusiness,
+  CheckCircle2,
+  Clock3,
+  Send,
+} from "lucide-react";
 import { ApplicationCharts } from "@/components/charts/application-charts";
 import { DashboardSidebar } from "@/components/layout/dashboard-sidebar";
 import { DashboardTopbar } from "@/components/layout/dashboard-topbar";
@@ -19,7 +25,8 @@ const storageKey = "applytics-applications";
 const userKey = "applytics-user";
 
 export function DashboardShell() {
-  const [applications, setApplications] = useState<JobApplication[]>(defaultApplications);
+  const [applications, setApplications] =
+    useState<JobApplication[]>(defaultApplications);
   const [query, setQuery] = useState("");
   const [username, setUsername] = useState("Job Hunter");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -76,20 +83,23 @@ export function DashboardShell() {
     );
   }, [applications, filters, query]);
 
-  const stats = useMemo(() => getSummaryStats(filteredApplications), [filteredApplications]);
+  const stats = useMemo(
+    () => getSummaryStats(filteredApplications),
+    [filteredApplications],
+  );
 
   function addRow() {
     setApplications((current) => [
       {
         id: `app-${Date.now()}`,
-        company: "New Company",
-        position: "Role title",
+        company: "Perusahaan Baru",
+        position: "Judul Posisi",
         status: "Applied",
         applicationDate: new Date().toISOString().slice(0, 10),
         salary: 0,
         nextAction: ["Waiting"],
         website: "https://",
-        contact: "contact@example.com",
+        contact: "kontak@example.com",
       },
       ...current,
     ]);
@@ -104,42 +114,41 @@ export function DashboardShell() {
   }
 
   function deleteRow(id: string) {
-    setApplications((current) => current.filter((application) => application.id !== id));
-  }
-
-  function login(nextUsername: string) {
-    setUsername(nextUsername);
-    window.localStorage.setItem(userKey, nextUsername);
+    setApplications((current) =>
+      current.filter((application) => application.id !== id),
+    );
   }
 
   return (
-    // <div className="grid min-h-screen bg-[#07090d] text-white lg:grid-cols-[248px_1fr]">
-    <div className="flex min-h-screen bg-[#07090d] text-white">
+    <div className="flex min-h-screen max-w-full overflow-x-hidden bg-slate-50 text-slate-950">
       <DashboardSidebar isOpen={isSidebarOpen} />
-      <div className="flex-1 min-w-0">
-      {/* <div className="min-w-0"> */}
-        <DashboardTopbar 
+
+      <div className="min-w-0 flex-1 overflow-x-hidden">
+        <DashboardTopbar
           username={username}
-          toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} 
+          toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
         />
 
-        <main className="mx-auto grid w-full max-w-[1500px] gap-5 px-4 py-5 sm:px-6">
+        <main className="mx-auto grid w-full max-w-[1500px] min-w-0 gap-5 px-4 py-5 sm:px-6">
           <section className="flex flex-col gap-2">
-            <span className="text-xs uppercase tracking-[0.2em] text-blue-200">
+            <span className="text-xs uppercase tracking-[0.2em] text-blue-600">
               Dashboard
             </span>
+
             <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
               <div>
-                <h1 className="text-3xl font-semibold text-white sm:text-4xl">
-                  Track your job applications smarter
+                <h1 className="text-3xl font-semibold text-slate-950 sm:text-4xl">
+                  Pantau lamaran kerja dengan lebih teratur
                 </h1>
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
-                  A Notion-inspired application database with analytics, filters, and
-                  inline editing for every job hunting detail.
+
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+                  Kelola data lamaran, status seleksi, analitik, filter, dan
+                  detail penting lainnya dalam satu dashboard.
                 </p>
               </div>
-              <span className="rounded-md border border-white/10 bg-white/[0.045] px-3 py-2 text-sm text-zinc-300">
-                {filteredApplications.length} visible rows
+
+              <span className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 shadow-sm">
+                {filteredApplications.length} data ditampilkan
               </span>
             </div>
           </section>
@@ -147,33 +156,37 @@ export function DashboardShell() {
           <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
             <MetricCard
               icon={<BriefcaseBusiness size={18} />}
-              label="Applications"
+              label="Total Lamaran"
               value={stats.total}
-              caption="Filtered rows"
+              caption="Data sesuai filter aktif"
             />
+
             <MetricCard
               icon={<Clock3 size={18} />}
-              label="Ongoing"
+              label="Sedang Berjalan"
               value={stats.ongoing}
-              caption="Applied, interviewed, offer"
+              caption="Applied, interview, dan offer"
             />
+
             <MetricCard
               icon={<BarChart3 size={18} />}
-              label="Interviews"
+              label="Wawancara"
               value={stats.interviewed}
-              caption={`${stats.interviewRate}% interview rate`}
+              caption={`${stats.interviewRate}% rasio wawancara`}
             />
+
             <MetricCard
               icon={<Send size={18} />}
-              label="Offers"
+              label="Penawaran"
               value={stats.offers}
-              caption="Needs decision or follow-up"
+              caption="Perlu keputusan atau tindak lanjut"
             />
+
             <MetricCard
               icon={<CheckCircle2 size={18} />}
-              label="Accepted"
+              label="Diterima"
               value={`${stats.acceptanceRate}%`}
-              caption={`${stats.accepted} accepted`}
+              caption={`${stats.accepted} lamaran diterima`}
             />
           </section>
 

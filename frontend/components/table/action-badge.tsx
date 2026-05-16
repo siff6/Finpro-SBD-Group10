@@ -15,16 +15,17 @@ export function ActionBadge({
     <span
       className={`inline-flex h-7 items-center gap-1 rounded-md border px-2 text-xs font-medium ${meta.bg} ${meta.text}`}
     >
-      {action}
+      {meta.label}
+
       {onRemove ? (
         <button
           type="button"
-          aria-label={`Remove ${action}`}
+          aria-label={`Hapus tindakan ${meta.label}`}
           onClick={(event) => {
             event.stopPropagation();
             onRemove();
           }}
-          className="grid size-4 place-items-center rounded hover:bg-white/10"
+          className="grid size-4 place-items-center rounded transition hover:bg-slate-200/70"
         >
           <X size={12} />
         </button>
