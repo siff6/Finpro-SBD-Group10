@@ -16,6 +16,7 @@ export type NextAction =
 
 export type JobApplication = {
   id: string;
+  companyId: string;
   company: string;
   position: string;
   status: ApplicationStatus;

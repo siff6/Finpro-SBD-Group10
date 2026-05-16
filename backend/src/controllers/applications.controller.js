@@ -220,6 +220,12 @@ const updateApplication = async (req, res, next) => {
             source,
         } = req.body;
 
+        if (jobType && !allowedJobTypes.includes(jobType)) {
+            return res.status(400).json({
+                message: "Jenis kerja tidak valid.",
+            });
+        }
+
         const existingResult = await query(
             `
             select status

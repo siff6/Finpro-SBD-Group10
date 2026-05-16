@@ -117,6 +117,7 @@ function createInitialApplicationForm(): CreateApplicationForm {
 function mapBackendApplication(application: BackendApplication): JobApplication {
   return {
     id: application.application_id,
+    companyId: application.company_id,
     company: application.company_name,
     position: application.position,
     status: normalizeStatus(application.status),
@@ -125,6 +126,18 @@ function mapBackendApplication(application: BackendApplication): JobApplication 
     nextAction: ["Waiting"],
     website: application.source || "-",
     contact: application.job_type || "-",
+  };
+}
+
+function createUpdatePayload(application: JobApplication) {
+  return {
+    company_id: application.companyId,
+    position: application.position,
+    status: application.status,
+    application_date: application.applicationDate,
+    salary: Number(application.salary || 0),
+    job_type: application.contact,
+    source: application.website === "-" ? null : application.website,
   };
 }
 
@@ -340,12 +353,62 @@ export function DashboardShell() {
     }
   }
 
-  function updateRow(id: string, patch: Partial<JobApplication>) {
-    setApplications((current) =>
-      current.map((application) =>
-        application.id === id ? { ...application, ...patch } : application,
-      ),
+  async function updateRow(id: string, patch: Partial<JobApplication>) {
+    const selectedApplication = applications.find(
+      (application) => application.id === id,
     );
+
+    if (!selectedApplication) {
+      return;
+    }
+
+    const updatedApplication = {
+      ...selectedApplication,
+      ...patch,
+    };
+
+    const previousApplications = applications;
+
+    try {
+      setApplicationsError("");
+      // optimistic update, biar UI langsung terasa responsif
+      setApplications((current) =>
+        current.map((application) =>
+          application.id === id ? updatedApplication : application,
+        ),
+      );
+
+      const token = window.localStorage.getItem(tokenKey);
+
+      if (!token) {
+        throw new Error("Sesi login tidak ditemukan. Silakan login ulang.");
+      }
+
+      const response = await fetch(`${API_BASE_URL}/applications/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(createUpdatePayload(updatedApplication)),
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(data?.message || "Gagal memperbarui lamaran.");
+      }
+
+      await fetchApplications();
+    } catch (error) {
+      // rollback kalau gagal
+      setApplications(previousApplications);
+      setApplicationsError(
+        error instanceof Error
+          ? error.message
+          : "Gagal memperbarui lamaran.",
+      );
+    }
   }
 
   async function deleteRow(id: string) {
