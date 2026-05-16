@@ -6,11 +6,13 @@ import { Search, UserRound, Menu, LogOut } from "lucide-react";
 
 type DashboardTopbarProps = {
   username: string;
+  isSidebarOpen: boolean;
   toggleSidebar: () => void;
 };
 
 export function DashboardTopbar({
   username,
+  isSidebarOpen,
   toggleSidebar,
 }: DashboardTopbarProps) {
   const router = useRouter();
@@ -26,14 +28,16 @@ export function DashboardTopbar({
     <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur-xl">
       <div className="flex min-h-16 items-center justify-between gap-4 px-4 sm:px-6">
         <div className="flex w-full max-w-md items-center gap-3">
-          <button
-            type="button"
-            onClick={toggleSidebar}
-            className="hidden place-items-center rounded-md border border-slate-200 text-slate-500 transition hover:bg-slate-100 hover:text-slate-950 lg:grid lg:size-10"
-            aria-label="Buka atau tutup sidebar"
-          >
-            <Menu size={18} />
-          </button>
+          {!isSidebarOpen && (
+            <button
+              type="button"
+              onClick={toggleSidebar}
+              className="hidden place-items-center rounded-md border border-slate-200 text-slate-500 transition hover:bg-slate-100 hover:text-slate-950 lg:grid lg:size-10"
+              aria-label="Buka sidebar"
+            >
+              <Menu size={18} />
+            </button>
+          )}
 
           <label className="hidden h-10 w-full items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 text-slate-500 transition focus-within:border-blue-400 focus-within:bg-white md:flex">
             <Search size={16} />

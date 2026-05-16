@@ -121,11 +121,15 @@ export function DashboardShell() {
 
   return (
     <div className="flex min-h-screen max-w-full overflow-x-hidden bg-slate-50 text-slate-950">
-      <DashboardSidebar isOpen={isSidebarOpen} />
+      <DashboardSidebar
+        isOpen={isSidebarOpen}
+        toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+      />
 
       <div className="min-w-0 flex-1 overflow-x-hidden">
         <DashboardTopbar
           username={username}
+          isSidebarOpen={isSidebarOpen}
           toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
         />
 
