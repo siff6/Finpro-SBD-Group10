@@ -139,6 +139,7 @@ export function DashboardShell() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isCreatingApplication, setIsCreatingApplication] = useState(false);
   const [createApplicationError, setCreateApplicationError] = useState("");
+  const [deletingApplicationId, setDeletingApplicationId] = useState<string | null>(null);
   const [createForm, setCreateForm] = useState<CreateApplicationForm>(
     createInitialApplicationForm,
   );
@@ -347,10 +348,60 @@ export function DashboardShell() {
     );
   }
 
-  function deleteRow(id: string) {
-    setApplications((current) =>
-      current.filter((application) => application.id !== id),
+  async function deleteRow(id: string) {
+    const selectedApplication = applications.find(
+      (application) => application.id === id,
     );
+
+    const confirmed = window.confirm(
+      `Yakin ingin menghapus lamaran ${
+        selectedApplication
+          ? `${selectedApplication.position} di ${selectedApplication.company}`
+          : "ini"
+      }?`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    if (deletingApplicationId) {
+      return;
+    }
+
+    try {
+      setDeletingApplicationId(id);
+      setApplicationsError("");
+
+      const token = window.localStorage.getItem(tokenKey);
+
+      if (!token) {
+        throw new Error("Sesi login tidak ditemukan. Silakan login ulang.");
+      }
+
+      const response = await fetch(`${API_BASE_URL}/applications/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(data?.message || "Gagal menghapus lamaran.");
+      }
+
+      setApplications((current) =>
+        current.filter((application) => application.id !== id),
+      );
+    } catch (error) {
+      setApplicationsError(
+        error instanceof Error ? error.message : "Gagal menghapus lamaran.",
+      );
+    } finally {
+      setDeletingApplicationId(null);
+    }
   }
 
   return (
