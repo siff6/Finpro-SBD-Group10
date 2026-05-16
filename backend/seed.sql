@@ -26,7 +26,7 @@ create table public.users (
   user_id uuid primary key default gen_random_uuid(),
   username text not null,
   email text not null unique,
-  password text,
+  password text not null,
   created_at timestamptz not null default now()
 );
 
@@ -212,6 +212,10 @@ create index application_notes_user_id_idx
 -- SEED DATA
 -- =========================================================
 
+-- Catatan:
+-- Password untuk semua akun demo adalah: password123
+-- Password disimpan dalam bentuk bcrypt hash.
+
 -- USERS
 insert into public.users (user_id, username, email, password, created_at)
 values
@@ -219,14 +223,14 @@ values
   '11111111-1111-1111-1111-111111111111',
   'Ziehan',
   'ziehan@example.com',
-  'password123',
+  '$2b$10$KYVbZ5JFVfqu0oV0rQb3E.KG5V5GEZIBxC6JYwRjzKsX9y2PfZkiC',
   now()
 ),
 (
   '22222222-2222-2222-2222-222222222222',
   'Demo User',
   'demo@example.com',
-  'password123',
+  '$2b$10$KYVbZ5JFVfqu0oV0rQb3E.KG5V5GEZIBxC6JYwRjzKsX9y2PfZkiC',
   now()
 );
 
@@ -272,6 +276,16 @@ values
   'E-Commerce',
   'Jakarta',
   'career@shopee.co.id',
+  now()
+),
+(
+  'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee',
+  '22222222-2222-2222-2222-222222222222',
+  'Traveloka',
+  'https://www.traveloka.com',
+  'Technology',
+  'Tangerang',
+  'career@traveloka.com',
   now()
 );
 
@@ -352,6 +366,19 @@ values
   'Accepted',
   current_date - interval '2 days',
   3200000,
+  'Internship',
+  'LinkedIn',
+  now(),
+  now()
+),
+(
+  '10000000-0000-0000-0000-000000000007',
+  '22222222-2222-2222-2222-222222222222',
+  'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee',
+  'UI/UX Designer Intern',
+  'Applied',
+  current_date - interval '3 days',
+  2500000,
   'Internship',
   'LinkedIn',
   now(),
@@ -465,6 +492,14 @@ values
   'Accepted',
   current_date,
   'Lamaran diterima dan user menyetujui posisi tersebut.'
+),
+(
+  gen_random_uuid(),
+  '10000000-0000-0000-0000-000000000007',
+  null,
+  'Applied',
+  current_date - interval '3 days',
+  'Lamaran dikirim oleh demo user.'
 );
 
 -- REMINDERS
@@ -500,6 +535,26 @@ values
   'Lengkapi dokumen administrasi untuk offering.',
   false,
   now()
+),
+(
+  gen_random_uuid(),
+  '10000000-0000-0000-0000-000000000004',
+  '11111111-1111-1111-1111-111111111111',
+  'Other',
+  now() - interval '1 day',
+  'Catat feedback dari proses rekrutmen.',
+  true,
+  now()
+),
+(
+  gen_random_uuid(),
+  '10000000-0000-0000-0000-000000000007',
+  '22222222-2222-2222-2222-222222222222',
+  'Follow-up',
+  now() + interval '4 days',
+  'Demo user follow up application.',
+  false,
+  now()
 );
 
 -- APPLICATION NOTES
@@ -515,6 +570,13 @@ values
 ),
 (
   gen_random_uuid(),
+  '10000000-0000-0000-0000-000000000002',
+  '11111111-1111-1111-1111-111111111111',
+  'Perlu follow up recruiter jika belum ada kabar setelah beberapa hari.',
+  now()
+),
+(
+  gen_random_uuid(),
   '10000000-0000-0000-0000-000000000003',
   '11111111-1111-1111-1111-111111111111',
   'Interview membahas SQL, dashboard analytics, dan basic statistics.',
@@ -525,5 +587,12 @@ values
   '10000000-0000-0000-0000-000000000005',
   '11111111-1111-1111-1111-111111111111',
   'Perlu pertimbangkan offering, benefit, dan lokasi kerja.',
+  now()
+),
+(
+  gen_random_uuid(),
+  '10000000-0000-0000-0000-000000000007',
+  '22222222-2222-2222-2222-222222222222',
+  'Catatan dummy untuk demo user.',
   now()
 );
