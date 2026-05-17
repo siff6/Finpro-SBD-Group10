@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   BarChart3,
   BriefcaseBusiness,
@@ -9,10 +11,10 @@ import {
 } from "lucide-react";
 
 const items = [
-  { label: "Dashboard", icon: LayoutDashboard },
-  { label: "Lamaran", icon: BriefcaseBusiness },
-  { label: "Analitik", icon: BarChart3 },
-  { label: "Pengaturan", icon: Settings },
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { label: "Lamaran", href: "/dashboard/lamaran", icon: BriefcaseBusiness },
+  { label: "Analitik", href: "/dashboard/analitik", icon: BarChart3 },
+  { label: "Pengaturan", href: "/dashboard/pengaturan", icon: Settings },
 ];
 
 type DashboardSidebarProps = {
@@ -24,6 +26,16 @@ export function DashboardSidebar({
   isOpen,
   toggleSidebar,
 }: DashboardSidebarProps) {
+  const pathname = usePathname();
+
+  const isActiveRoute = (href: string) => {
+    if (href === "/dashboard") {
+      return pathname === "/dashboard";
+    }
+
+    return pathname.startsWith(href);
+  };
+
   return (
     <aside
       className={`hidden min-h-screen overflow-hidden border-r border-slate-200 bg-white py-4 transition-all duration-300 ease-in-out lg:block ${
@@ -55,22 +67,23 @@ export function DashboardSidebar({
       </div>
 
       <nav className="mt-8 grid min-w-[220px] gap-1">
-        {items.map((item, index) => {
+        {items.map((item) => {
           const Icon = item.icon;
+          const isActive = isActiveRoute(item.href);
 
           return (
-            <button
+            <Link
               key={item.label}
-              type="button"
+              href={item.href}
               className={`flex h-10 shrink-0 items-center gap-3 rounded-md px-3 text-sm transition ${
-                index === 0
-                  ? "bg-blue-50 text-blue-700"
+                isActive
+                  ? "bg-blue-50 font-semibold text-blue-700"
                   : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
               }`}
             >
               <Icon size={17} className="shrink-0" />
               {item.label}
-            </button>
+            </Link>
           );
         })}
       </nav>

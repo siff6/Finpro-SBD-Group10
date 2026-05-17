@@ -6,7 +6,13 @@ import {
   BriefcaseBusiness,
   CheckCircle2,
   Clock3,
+  Database,
+  Globe2,
+  LogOut,
+  Palette,
   Send,
+  ShieldCheck,
+  UserRound,
   X,
 } from "lucide-react";
 import { ApplicationCharts } from "@/components/charts/application-charts";
@@ -164,7 +170,14 @@ function createUpdatePayload(application: JobApplication) {
   };
 }
 
-export function DashboardShell() {
+type DashboardShellProps = {
+  view?: "dashboard" | "lamaran" | "analitik" | "pengaturan";
+};
+
+export function DashboardShell({ view = "dashboard" }: DashboardShellProps) {
+  const isApplicationsPage = view === "lamaran";
+  const isAnalyticsPage = view === "analitik";
+  const isSettingsPage = view === "pengaturan";
   const [applications, setApplications] = useState<JobApplication[]>([]);
   const [companies, setCompanies] = useState<BackendCompany[]>([]);
   const [query, setQuery] = useState("");
@@ -590,6 +603,12 @@ export function DashboardShell() {
     }
   }
 
+  function handleLogout() {
+    window.localStorage.removeItem(tokenKey);
+    window.localStorage.removeItem(userKey);
+    window.location.href = "/login";
+  }
+
   return (
     <div className="flex min-h-screen max-w-full overflow-x-hidden bg-slate-50 text-slate-950">
       <DashboardSidebar
@@ -607,40 +626,64 @@ export function DashboardShell() {
         <main className="mx-auto grid w-full max-w-[1500px] min-w-0 gap-5 px-4 py-5 sm:px-6">
           <section className="flex flex-col gap-2">
             <span className="text-xs uppercase tracking-[0.2em] text-blue-600">
-              Dashboard
+              {isApplicationsPage
+                ? "Lamaran"
+                : isAnalyticsPage
+                  ? "Analitik"
+                  : isSettingsPage
+                    ? "Pengaturan"
+                    : "Dashboard"}
             </span>
 
             <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
               <div>
                 <h1 className="text-3xl font-semibold text-slate-950 sm:text-4xl">
-                  Pantau lamaran kerja dengan lebih teratur
+                  {isApplicationsPage
+                    ? "Kelola semua lamaran kerja Anda"
+                    : isAnalyticsPage
+                      ? "Analisis perkembangan lamaran kerja Anda"
+                      : isSettingsPage
+                        ? "Atur akun dan preferensi workspace"
+                        : "Pantau lamaran kerja dengan lebih teratur"}
                 </h1>
 
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-                  Kelola data lamaran, status seleksi, analitik, filter, dan
-                  detail penting lainnya dalam satu dashboard.
+                  {isApplicationsPage
+                    ? "Lihat, cari, tambah, perbarui, dan hapus data lamaran kerja dalam satu halaman yang lebih fokus."
+                    : isAnalyticsPage
+                      ? "Pahami status lamaran, peluang wawancara, penawaran, dan hasil akhir dari proses pencarian kerja Anda."
+                      : isSettingsPage
+                        ? "Lihat informasi akun, preferensi tampilan, status data, dan akses keluar dari akun."
+                        : "Kelola data lamaran, status seleksi, analitik, filter, dan detail penting lainnya dalam satu dashboard."}
                 </p>
               </div>
 
               <span className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 shadow-sm">
-                {filteredApplications.length} data ditampilkan
+                {isApplicationsPage
+                  ? `${filteredApplications.length} lamaran ditemukan`
+                  : isAnalyticsPage
+                    ? `${filteredApplications.length} data dianalisis`
+                    : isSettingsPage
+                      ? "Pengaturan akun"
+                      : `${filteredApplications.length} data ditampilkan`}
               </span>
             </div>
           </section>
 
-          {isLoadingApplications ? (
+          {!isSettingsPage && isLoadingApplications ? (
             <div className="rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-600 shadow-sm">
               Memuat data lamaran...
             </div>
           ) : null}
 
-          {applicationsError ? (
+          {!isSettingsPage && applicationsError ? (
             <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 shadow-sm">
               {applicationsError}
             </div>
           ) : null}
 
-          {!isLoadingApplications &&
+          {!isSettingsPage &&
+          !isLoadingApplications &&
           !applicationsError &&
           applications.length === 0 ? (
             <div className="rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-600 shadow-sm">
@@ -649,55 +692,112 @@ export function DashboardShell() {
             </div>
           ) : null}
 
-          <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-            <MetricCard
-              icon={<BriefcaseBusiness size={18} />}
-              label="Total Lamaran"
-              value={stats.total}
-              caption="Data sesuai filter aktif"
+          {!isApplicationsPage && !isSettingsPage ? (
+            <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+              <MetricCard
+                icon={<BriefcaseBusiness size={18} />}
+                label="Total Lamaran"
+                value={stats.total}
+                caption="Data sesuai filter aktif"
+              />
+
+              <MetricCard
+                icon={<Clock3 size={18} />}
+                label="Sedang Berjalan"
+                value={stats.ongoing}
+                caption="Applied, interview, dan offer"
+              />
+
+              <MetricCard
+                icon={<BarChart3 size={18} />}
+                label="Wawancara"
+                value={stats.interviewed}
+                caption={`${stats.interviewRate}% rasio wawancara`}
+              />
+
+              <MetricCard
+                icon={<Send size={18} />}
+                label="Penawaran"
+                value={stats.offers}
+                caption="Perlu keputusan atau tindak lanjut"
+              />
+
+              <MetricCard
+                icon={<CheckCircle2 size={18} />}
+                label="Diterima"
+                value={`${stats.acceptanceRate}%`}
+                caption={`${stats.accepted} lamaran diterima`}
+              />
+            </section>
+          ) : null}
+
+          {!isSettingsPage ? (
+            <FilterBar filters={filters} onChange={setFilters} />
+          ) : null}
+
+          {!isAnalyticsPage && !isSettingsPage ? (
+            <ApplicationTable
+              applications={filteredApplications}
+              query={query}
+              onQueryChange={setQuery}
+              onAddRow={openCreateModal}
+              onChange={updateRow}
+              onDelete={deleteRow}
             />
+          ) : null}
 
-            <MetricCard
-              icon={<Clock3 size={18} />}
-              label="Sedang Berjalan"
-              value={stats.ongoing}
-              caption="Applied, interview, dan offer"
+          {isAnalyticsPage ? (
+            <section className="grid gap-3 md:grid-cols-3">
+              <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+                <span className="text-sm font-medium text-slate-500">
+                  Rasio Wawancara
+                </span>
+                <strong className="mt-2 block text-3xl font-semibold text-slate-950">
+                  {stats.interviewRate}%
+                </strong>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  Persentase lamaran yang sudah masuk tahap wawancara.
+                </p>
+              </article>
+
+              <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+                <span className="text-sm font-medium text-slate-500">
+                  Rasio Diterima
+                </span>
+                <strong className="mt-2 block text-3xl font-semibold text-slate-950">
+                  {stats.acceptanceRate}%
+                </strong>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  Persentase lamaran yang berhasil diterima.
+                </p>
+              </article>
+
+              <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+                <span className="text-sm font-medium text-slate-500">
+                  Proses Berjalan
+                </span>
+                <strong className="mt-2 block text-3xl font-semibold text-slate-950">
+                  {stats.ongoing}
+                </strong>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  Lamaran yang masih perlu dipantau atau ditindaklanjuti.
+                </p>
+              </article>
+            </section>
+          ) : null}
+
+          {isSettingsPage ? (
+            <SettingsPanel
+              username={username}
+              totalApplications={applications.length}
+              totalCompanies={companies.length}
+              onLogout={handleLogout}
             />
+          ) : null}
 
-            <MetricCard
-              icon={<BarChart3 size={18} />}
-              label="Wawancara"
-              value={stats.interviewed}
-              caption={`${stats.interviewRate}% rasio wawancara`}
-            />
-
-            <MetricCard
-              icon={<Send size={18} />}
-              label="Penawaran"
-              value={stats.offers}
-              caption="Perlu keputusan atau tindak lanjut"
-            />
-
-            <MetricCard
-              icon={<CheckCircle2 size={18} />}
-              label="Diterima"
-              value={`${stats.acceptanceRate}%`}
-              caption={`${stats.accepted} lamaran diterima`}
-            />
-          </section>
-
-          <FilterBar filters={filters} onChange={setFilters} />
-
-          <ApplicationTable
-            applications={filteredApplications}
-            query={query}
-            onQueryChange={setQuery}
-            onAddRow={openCreateModal}
-            onChange={updateRow}
-            onDelete={deleteRow}
-          />
-
-          <ApplicationCharts applications={filteredApplications} />
+          {!isApplicationsPage && !isSettingsPage ? (
+            <ApplicationCharts applications={filteredApplications} />
+          ) : null}
         </main>
       </div>
 
@@ -1008,6 +1108,194 @@ export function DashboardShell() {
           </div>
         </div>
       ) : null}
+    </div>
+  );
+}
+
+function SettingsPanel({
+  username,
+  totalApplications,
+  totalCompanies,
+  onLogout,
+}: {
+  username: string;
+  totalApplications: number;
+  totalCompanies: number;
+  onLogout: () => void;
+}) {
+  return (
+    <section className="grid gap-5 xl:grid-cols-[1fr_0.9fr]">
+      <div className="grid gap-5">
+        <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex items-start gap-4">
+            <span className="grid size-11 shrink-0 place-items-center rounded-xl border border-blue-200 bg-blue-50 text-blue-700">
+              <UserRound size={20} />
+            </span>
+
+            <div className="min-w-0">
+              <h2 className="text-lg font-semibold text-slate-950">
+                Profil Akun
+              </h2>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                Informasi dasar akun yang sedang digunakan di workspace Applytics.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+              <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                Nama Pengguna
+              </span>
+              <p className="mt-2 text-sm font-semibold text-slate-950">
+                {username || "Job Hunter"}
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+              <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                Status Sesi
+              </span>
+              <p className="mt-2 text-sm font-semibold text-emerald-700">
+                Aktif
+              </p>
+            </div>
+          </div>
+        </article>
+
+        <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex items-start gap-4">
+            <span className="grid size-11 shrink-0 place-items-center rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700">
+              <ShieldCheck size={20} />
+            </span>
+
+            <div>
+              <h2 className="text-lg font-semibold text-slate-950">
+                Keamanan Akun
+              </h2>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                Gunakan fitur lupa kata sandi jika ingin mengganti kata sandi akun.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4">
+            <span className="text-sm font-semibold text-slate-950">
+              Verifikasi email
+            </span>
+            <p className="mt-1 text-sm leading-6 text-slate-600">
+              Akun yang dapat masuk ke dashboard adalah akun yang sudah berhasil diverifikasi.
+            </p>
+          </div>
+        </article>
+      </div>
+
+      <div className="grid gap-5">
+        <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex items-start gap-4">
+            <span className="grid size-11 shrink-0 place-items-center rounded-xl border border-violet-200 bg-violet-50 text-violet-700">
+              <Palette size={20} />
+            </span>
+
+            <div>
+              <h2 className="text-lg font-semibold text-slate-950">
+                Preferensi Tampilan
+              </h2>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                Pengaturan tampilan dasar yang digunakan di dashboard.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-5 grid gap-3">
+            <SettingRow
+              icon={<Palette size={17} />}
+              label="Tema"
+              value="Light"
+            />
+            <SettingRow
+              icon={<Globe2 size={17} />}
+              label="Bahasa"
+              value="Indonesia"
+            />
+            <SettingRow
+              icon={<Database size={17} />}
+              label="Format Mata Uang"
+              value="Rupiah"
+            />
+          </div>
+        </article>
+
+        <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <h2 className="text-lg font-semibold text-slate-950">
+            Ringkasan Data
+          </h2>
+          <p className="mt-1 text-sm leading-6 text-slate-600">
+            Jumlah data yang sudah tercatat di akun Anda.
+          </p>
+
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+              <span className="text-sm text-slate-500">
+                Total Lamaran
+              </span>
+              <strong className="mt-1 block text-2xl font-semibold text-slate-950">
+                {totalApplications}
+              </strong>
+            </div>
+
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+              <span className="text-sm text-slate-500">
+                Total Perusahaan
+              </span>
+              <strong className="mt-1 block text-2xl font-semibold text-slate-950">
+                {totalCompanies}
+              </strong>
+            </div>
+          </div>
+        </article>
+
+        <article className="rounded-xl border border-red-200 bg-red-50 p-5 shadow-sm">
+          <h2 className="text-lg font-semibold text-red-900">
+            Keluar dari Akun
+          </h2>
+          <p className="mt-1 text-sm leading-6 text-red-700">
+            Gunakan tombol ini jika ingin mengakhiri sesi login di perangkat ini.
+          </p>
+
+          <button
+            type="button"
+            onClick={onLogout}
+            className="mt-5 inline-flex h-10 items-center justify-center gap-2 rounded-md bg-red-600 px-4 text-sm font-semibold text-white transition hover:bg-red-700"
+          >
+            <LogOut size={17} />
+            Keluar dari Akun
+          </button>
+        </article>
+      </div>
+    </section>
+  );
+}
+
+function SettingRow({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
+      <div className="flex items-center gap-3 text-sm text-slate-600">
+        <span className="text-slate-500">{icon}</span>
+        <span>{label}</span>
+      </div>
+
+      <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700">
+        {value}
+      </span>
     </div>
   );
 }
