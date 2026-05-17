@@ -1,15 +1,13 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Plus, Search } from "lucide-react";
+import { Plus } from "lucide-react";
 import type { JobApplication } from "@/lib/applications/types";
 import { TableHeader } from "./table-header";
 import { TableRow } from "./table-row";
 
 type ApplicationTableProps = {
   applications: JobApplication[];
-  query: string;
-  onQueryChange: (query: string) => void;
   onAddRow: () => void;
   onChange: (id: string, patch: Partial<JobApplication>) => void;
   onDelete: (id: string) => void;
@@ -17,8 +15,6 @@ type ApplicationTableProps = {
 
 export function ApplicationTable({
   applications,
-  query,
-  onQueryChange,
   onAddRow,
   onChange,
   onDelete,
@@ -40,27 +36,14 @@ export function ApplicationTable({
           </p>
         </div>
 
-        <div className="flex min-w-0 flex-col gap-2 sm:flex-row">
-          <label className="flex h-10 min-w-0 items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 text-slate-500 transition focus-within:border-blue-400 focus-within:bg-white">
-            <Search size={16} />
-            <input
-              aria-label="Cari lamaran"
-              value={query}
-              onChange={(event) => onQueryChange(event.target.value)}
-              placeholder="Cari lamaran"
-              className="min-w-0 bg-transparent text-sm text-slate-950 outline-none placeholder:text-slate-400"
-            />
-          </label>
-
-          <button
-            type="button"
-            onClick={onAddRow}
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-blue-500 px-3 text-sm font-semibold text-white transition hover:bg-blue-600"
-          >
-            <Plus size={16} />
-            Tambah Lamaran
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={onAddRow}
+          className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-blue-500 px-3 text-sm font-semibold text-white transition hover:bg-blue-600"
+        >
+          <Plus size={16} />
+          Tambah Lamaran
+        </button>
       </div>
 
       <div className="w-full max-w-full overflow-visible">

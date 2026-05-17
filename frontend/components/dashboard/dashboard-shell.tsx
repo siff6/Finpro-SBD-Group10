@@ -621,6 +621,8 @@ export function DashboardShell({ view = "dashboard" }: DashboardShellProps) {
           username={username}
           isSidebarOpen={isSidebarOpen}
           toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+          searchQuery={query}
+          onSearchQueryChange={setQuery}
         />
 
         <main className="mx-auto grid w-full max-w-[1500px] min-w-0 gap-5 px-4 py-5 sm:px-6">
@@ -738,8 +740,6 @@ export function DashboardShell({ view = "dashboard" }: DashboardShellProps) {
           {!isAnalyticsPage && !isSettingsPage ? (
             <ApplicationTable
               applications={filteredApplications}
-              query={query}
-              onQueryChange={setQuery}
               onAddRow={openCreateModal}
               onChange={updateRow}
               onDelete={deleteRow}

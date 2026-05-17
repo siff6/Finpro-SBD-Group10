@@ -2,19 +2,24 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, UserRound, Menu, LogOut } from "lucide-react";
+import { Search, UserRound, Menu, LogOut, X } from "lucide-react";
 
 type DashboardTopbarProps = {
   username: string;
   isSidebarOpen: boolean;
   toggleSidebar: () => void;
+  searchQuery: string;
+  onSearchQueryChange: (query: string) => void;
 };
 
 export function DashboardTopbar({
   username,
   isSidebarOpen,
   toggleSidebar,
+  searchQuery,
+  onSearchQueryChange,
 }: DashboardTopbarProps) {
+
   const router = useRouter();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
@@ -40,12 +45,26 @@ export function DashboardTopbar({
           )}
 
           <label className="hidden h-10 w-full items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 text-slate-500 transition focus-within:border-blue-400 focus-within:bg-white md:flex">
-            <Search size={16} />
+            <Search size={16} className="shrink-0" />
+
             <input
-              aria-label="Pencarian dashboard"
-              placeholder="Cari pekerjaan, perusahaan, atau kontak"
+              aria-label="Cari lamaran"
+              value={searchQuery}
+              onChange={(event) => onSearchQueryChange(event.target.value)}
+              placeholder="Cari perusahaan, posisi, status, sumber, atau jenis kerja"
               className="min-w-0 flex-1 bg-transparent text-sm text-slate-950 outline-none placeholder:text-slate-400"
             />
+
+            {searchQuery ? (
+              <button
+                type="button"
+                onClick={() => onSearchQueryChange("")}
+                className="grid size-7 shrink-0 place-items-center rounded-md text-slate-400 transition hover:bg-slate-200 hover:text-slate-700"
+                aria-label="Hapus pencarian"
+              >
+                <X size={15} />
+              </button>
+            ) : null}
           </label>
         </div>
 
