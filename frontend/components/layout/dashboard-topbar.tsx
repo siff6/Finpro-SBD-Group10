@@ -65,17 +65,15 @@ export function DashboardTopbar({
             </button>
 
             {isProfileOpen && (
-              <div className="absolute right-0 mt-2 w-48 overflow-hidden rounded-md border border-slate-200 bg-white shadow-xl">
-                <div className="p-1">
-                  <button
-                    type="button"
-                    onClick={handleLogout}
-                    className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm text-red-600 transition hover:bg-red-50 hover:text-red-700"
-                  >
-                    <LogOut size={16} />
-                    Keluar dari Workspace
-                  </button>
-                </div>
+              <div className="absolute right-0 top-14 z-50 w-56 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl shadow-slate-200/70">
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold text-red-600 transition hover:bg-red-50 hover:text-red-700"
+                >
+                  <LogOut size={18} className="shrink-0" />
+                  <span>Keluar dari Akun</span>
+                </button>
               </div>
             )}
           </div>

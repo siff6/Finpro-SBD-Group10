@@ -1,6 +1,5 @@
 import Link from "next/link";
 import {
-  ArrowRight,
   BarChart3,
   CheckCircle2,
   ClipboardList,
@@ -11,6 +10,7 @@ import {
 } from "lucide-react";
 import { LandingDashboardMockup } from "@/components/charts/landing-dashboard-mockup";
 import { SiteHeader } from "@/components/layout/site-header";
+import { LandingHeroActions } from "@/components/landing/landing-hero-actions";
 
 const features = [
   {
@@ -89,28 +89,13 @@ export default function Home() {
                 pencarian kerja dalam satu dashboard yang mudah digunakan.
               </p>
 
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Link
-                  href="/dashboard"
-                  className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-800"
-                >
-                  Mulai Sekarang
-                  <ArrowRight size={18} />
-                </Link>
-
-                <Link
-                  href="/register"
-                  className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 font-semibold text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-400 hover:bg-slate-50"
-                >
-                  Buat Akun
-                </Link>
-              </div>
+              <LandingHeroActions />
 
               <div className="mt-8 grid gap-3 text-sm text-slate-600 sm:grid-cols-3">
                 {["Data tersimpan rapi", "Dashboard ringan", "Analitik mudah dibaca"].map(
                   (item) => (
                     <div key={item} className="flex items-center gap-2">
-                      <CheckCircle2 size={16} className="text-slate-900" />
+                      <CheckCircle2 size={16} className="text-blue-600" />
                       <span>{item}</span>
                     </div>
                   ),
@@ -149,7 +134,7 @@ export default function Home() {
                   key={feature.title}
                   className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-200/60 transition hover:-translate-y-1 hover:border-slate-300 hover:shadow-lg hover:shadow-slate-200/80"
                 >
-                  <span className="grid size-11 place-items-center rounded-xl border border-slate-200 bg-slate-50 text-slate-800 transition group-hover:bg-slate-950 group-hover:text-white">
+                  <span className="grid size-11 place-items-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 transition group-hover:border-blue-200 group-hover:bg-blue-50 group-hover:text-blue-700">
                     <Icon size={20} />
                   </span>
 
