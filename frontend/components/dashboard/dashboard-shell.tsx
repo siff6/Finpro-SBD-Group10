@@ -41,7 +41,7 @@ const tokenKey = "applytics-token";
 const userKey = "applytics-user";
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api";
+  (process.env.NEXT_PUBLIC_API_URL || "/api").replace(/\/$/, "");
 
 type BackendApplication = {
   application_id: string;

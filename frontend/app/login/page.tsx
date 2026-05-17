@@ -1,11 +1,11 @@
 "use client";
 
+import { API_BASE_URL } from "@/lib/api";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, LockKeyhole, Mail } from "lucide-react";
 import { SiteHeader } from "@/components/layout/site-header";
-import { API_BASE_URL } from "@/lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
