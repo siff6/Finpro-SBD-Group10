@@ -1,3 +1,4 @@
+import "dotenv/config";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { query } from "../config/db.js";
@@ -70,13 +71,21 @@ export const login = async (req, res, next) => {
             return res.status(401).json({ message: "Email atau kata sandi tidak valid." });
         }
         // pembuatan jwt token baru saat proses login berhasil
-        const token = jwt.sign({ user_id: user.user_id }, JWT_SECRET, { expiresIn: "7d" });
-        // menghapus properti password dari objek respon demi keamanan sistem
-        delete user.password;
+        const token = jwt.sign(
+            { user_id: user.user_id },
+            JWT_SECRET,
+            { expiresIn: "7d" }
+        );
+
         res.json({
             message: "Proses masuk berhasil.",
             token,
-            user
+            user: {
+                user_id: user.user_id,
+                username: user.username,
+                email: user.email,
+                is_verified: user.is_verified,
+            },
         });
     } catch (err) {
         next(err);

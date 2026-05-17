@@ -1,9 +1,18 @@
 export type ApplicationStatus =
   | "Applied"
+  | "Screening"
   | "Rejected"
   | "Interviewed"
   | "Accepted"
-  | "Offer";
+  | "Offer"
+  | "Withdrawn";
+
+export type JobType =
+  | "Internship"
+  | "Full-time"
+  | "Part-time"
+  | "Contract"
+  | "Freelance";
 
 export type NextAction =
   | "Follow up"
@@ -14,14 +23,15 @@ export type NextAction =
 
 export type JobApplication = {
   id: string;
+  companyId: string;
   company: string;
   position: string;
   status: ApplicationStatus;
   applicationDate: string;
   salary: number;
   nextAction: NextAction[];
-  website: string;
-  contact: string;
+  source: string;
+  jobType: JobType;
 };
 
 export type DashboardFilters = {
@@ -32,10 +42,20 @@ export type DashboardFilters = {
 
 export const statusOptions: ApplicationStatus[] = [
   "Applied",
-  "Rejected",
+  "Screening",
   "Interviewed",
-  "Accepted",
   "Offer",
+  "Accepted",
+  "Rejected",
+  "Withdrawn",
+];
+
+export const jobTypeOptions: JobType[] = [
+  "Internship",
+  "Full-time",
+  "Part-time",
+  "Contract",
+  "Freelance",
 ];
 
 export const nextActionOptions: NextAction[] = [
@@ -51,49 +71,83 @@ export const statusMeta: Record<
   { dot: string; label: string; text: string; bg: string; chart: string }
 > = {
   Applied: {
-    dot: "bg-blue-300",
-    label: "Applied",
-    text: "text-blue-100",
-    bg: "bg-blue-400/12 border-blue-300/20",
+    dot: "bg-blue-500",
+    label: "Dilamar",
+    text: "text-blue-700",
+    bg: "bg-blue-50 border-blue-200",
     chart: "#60a5fa",
   },
-  Rejected: {
-    dot: "bg-red-300",
-    label: "Rejected",
-    text: "text-red-100",
-    bg: "bg-red-400/12 border-red-300/20",
-    chart: "#f87171",
+  Screening: {
+    dot: "bg-cyan-500",
+    label: "Screening",
+    text: "text-cyan-700",
+    bg: "bg-cyan-50 border-cyan-200",
+    chart: "#22d3ee",
   },
   Interviewed: {
-    dot: "bg-yellow-300",
-    label: "Interviewed",
-    text: "text-yellow-100",
-    bg: "bg-yellow-400/12 border-yellow-300/20",
+    dot: "bg-amber-500",
+    label: "Wawancara",
+    text: "text-amber-700",
+    bg: "bg-amber-50 border-amber-200",
     chart: "#facc15",
   },
+  Offer: {
+    dot: "bg-violet-500",
+    label: "Penawaran",
+    text: "text-violet-700",
+    bg: "bg-violet-50 border-violet-200",
+    chart: "#c084fc",
+  },
   Accepted: {
-    dot: "bg-green-300",
-    label: "Accepted",
-    text: "text-green-100",
-    bg: "bg-green-400/12 border-green-300/20",
+    dot: "bg-emerald-500",
+    label: "Diterima",
+    text: "text-emerald-700",
+    bg: "bg-emerald-50 border-emerald-200",
     chart: "#4ade80",
   },
-  Offer: {
-    dot: "bg-purple-300",
-    label: "Offer",
-    text: "text-purple-100",
-    bg: "bg-purple-400/12 border-purple-300/20",
-    chart: "#c084fc",
+  Rejected: {
+    dot: "bg-red-500",
+    label: "Ditolak",
+    text: "text-red-700",
+    bg: "bg-red-50 border-red-200",
+    chart: "#f87171",
+  },
+  Withdrawn: {
+    dot: "bg-slate-500",
+    label: "Dibatalkan",
+    text: "text-slate-700",
+    bg: "bg-slate-100 border-slate-200",
+    chart: "#94a3b8",
   },
 };
 
-export const actionMeta: Record<NextAction, { text: string; bg: string }> = {
-  "Follow up": { text: "text-blue-100", bg: "bg-blue-400/12 border-blue-300/20" },
-  Waiting: { text: "text-zinc-100", bg: "bg-zinc-400/12 border-zinc-300/20" },
-  "Prepare Interview": {
-    text: "text-yellow-100",
-    bg: "bg-yellow-400/12 border-yellow-300/20",
+export const actionMeta: Record<
+  NextAction,
+  { label: string; text: string; bg: string }
+> = {
+  "Follow up": {
+    label: "Tindak Lanjut",
+    text: "text-blue-700",
+    bg: "bg-blue-50 border-blue-200",
   },
-  "Send email": { text: "text-green-100", bg: "bg-green-400/12 border-green-300/20" },
-  Decide: { text: "text-purple-100", bg: "bg-purple-400/12 border-purple-300/20" },
+  Waiting: {
+    label: "Menunggu",
+    text: "text-slate-700",
+    bg: "bg-slate-100 border-slate-200",
+  },
+  "Prepare Interview": {
+    label: "Persiapan Wawancara",
+    text: "text-amber-700",
+    bg: "bg-amber-50 border-amber-200",
+  },
+  "Send email": {
+    label: "Kirim Email",
+    text: "text-emerald-700",
+    bg: "bg-emerald-50 border-emerald-200",
+  },
+  Decide: {
+    label: "Ambil Keputusan",
+    text: "text-violet-700",
+    bg: "bg-violet-50 border-violet-200",
+  },
 };

@@ -13,7 +13,10 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { getMonthlyApplications, getStatusCounts } from "@/lib/applications/analytics";
+import {
+  getMonthlyApplications,
+  getStatusCounts,
+} from "@/lib/applications/analytics";
 import type { JobApplication } from "@/lib/applications/types";
 import { statusMeta } from "@/lib/applications/types";
 
@@ -28,11 +31,15 @@ export function ApplicationCharts({ applications }: ApplicationChartsProps) {
 
   return (
     <section className="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
-      <article className="rounded-lg border border-white/10 bg-white/[0.045] p-4 shadow-[0_20px_80px_rgba(0,0,0,0.18)]">
+      <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-xl font-semibold text-white">Status Ratio</h2>
-            <p className="mt-1 text-sm text-zinc-400">Accepted, rejected, and ongoing signal.</p>
+            <h2 className="text-xl font-semibold text-slate-950">
+              Rasio Status
+            </h2>
+            <p className="mt-1 text-sm text-slate-600">
+              Ringkasan status lamaran yang diterima, ditolak, dan sedang berjalan.
+            </p>
           </div>
         </div>
 
@@ -42,10 +49,11 @@ export function ApplicationCharts({ applications }: ApplicationChartsProps) {
               <PieChart>
                 <Tooltip
                   contentStyle={{
-                    background: "#11151d",
-                    border: "1px solid rgba(255,255,255,0.1)",
+                    background: "#ffffff",
+                    border: "1px solid #e2e8f0",
                     borderRadius: 8,
-                    color: "#fff",
+                    color: "#0f172a",
+                    boxShadow: "0 10px 30px rgba(15, 23, 42, 0.08)",
                   }}
                 />
                 <Pie
@@ -63,25 +71,34 @@ export function ApplicationCharts({ applications }: ApplicationChartsProps) {
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <div className="size-full rounded-md bg-white/[0.035]" />
+            <div className="size-full rounded-md bg-slate-100" />
           )}
         </div>
 
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-5">
           {statusData.map((item) => (
-            <div key={item.status} className="rounded-md border border-white/10 bg-black/20 p-3">
-              <span className="text-xs text-zinc-500">{item.status}</span>
-              <span className="mt-1 block text-xl font-semibold text-white">{item.count}</span>
+            <div
+              key={item.status}
+              className="rounded-md border border-slate-200 bg-slate-50 p-3"
+            >
+              <span className="text-xs text-slate-500">
+                {statusMeta[item.status].label}
+              </span>
+              <span className="mt-1 block text-xl font-semibold text-slate-950">
+                {item.count}
+              </span>
             </div>
           ))}
         </div>
       </article>
 
-      <article className="rounded-lg border border-white/10 bg-white/[0.045] p-4 shadow-[0_20px_80px_rgba(0,0,0,0.18)]">
+      <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
         <div>
-          <h2 className="text-xl font-semibold text-white">Application Velocity</h2>
-          <p className="mt-1 text-sm text-zinc-400">
-            Applications per date, interview count, and acceptance statistics.
+          <h2 className="text-xl font-semibold text-slate-950">
+            Perkembangan Lamaran
+          </h2>
+          <p className="mt-1 text-sm text-slate-600">
+            Jumlah lamaran berdasarkan tanggal untuk memantau ritme pencarian kerja.
           </p>
         </div>
 
@@ -89,16 +106,27 @@ export function ApplicationCharts({ applications }: ApplicationChartsProps) {
           {mounted ? (
             <ResponsiveContainer width="99%" height="100%" minWidth={0} minHeight={0}>
               <BarChart data={monthlyData}>
-                <CartesianGrid stroke="rgba(255,255,255,0.08)" vertical={false} />
-                <XAxis dataKey="date" stroke="#71717a" tickLine={false} axisLine={false} />
-                <YAxis stroke="#71717a" tickLine={false} axisLine={false} width={32} />
+                <CartesianGrid stroke="#e2e8f0" vertical={false} />
+                <XAxis
+                  dataKey="date"
+                  stroke="#64748b"
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <YAxis
+                  stroke="#64748b"
+                  tickLine={false}
+                  axisLine={false}
+                  width={32}
+                />
                 <Tooltip
-                  cursor={{ fill: "rgba(255,255,255,0.04)" }}
+                  cursor={{ fill: "#f1f5f9" }}
                   contentStyle={{
-                    background: "#11151d",
-                    border: "1px solid rgba(255,255,255,0.1)",
+                    background: "#ffffff",
+                    border: "1px solid #e2e8f0",
                     borderRadius: 8,
-                    color: "#fff",
+                    color: "#0f172a",
+                    boxShadow: "0 10px 30px rgba(15, 23, 42, 0.08)",
                   }}
                 />
                 <Bar
@@ -110,7 +138,7 @@ export function ApplicationCharts({ applications }: ApplicationChartsProps) {
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <div className="size-full rounded-md bg-white/[0.035]" />
+            <div className="size-full rounded-md bg-slate-100" />
           )}
         </div>
       </article>

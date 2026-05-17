@@ -10,21 +10,27 @@ type FilterBarProps = {
 
 export function FilterBar({ filters, onChange }: FilterBarProps) {
   return (
-    <section className="flex flex-col gap-3 rounded-lg border border-white/10 bg-white/[0.045] p-4 sm:flex-row sm:items-center sm:justify-between">
+    <section className="flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <h2 className="text-lg font-semibold text-white">Filters</h2>
-        <p className="mt-1 text-sm text-zinc-400">Charts and table update in realtime.</p>
+        <h2 className="text-lg font-semibold text-slate-950">Filter</h2>
+        <p className="mt-1 text-sm text-slate-600">
+          Grafik dan tabel akan diperbarui sesuai filter yang dipilih.
+        </p>
       </div>
+
       <div className="grid gap-2 sm:grid-cols-3">
         <select
-          aria-label="Status filter"
+          aria-label="Filter status"
           value={filters.status}
           onChange={(event) =>
-            onChange({ ...filters, status: event.target.value as DashboardFilters["status"] })
+            onChange({
+              ...filters,
+              status: event.target.value as DashboardFilters["status"],
+            })
           }
-          className="h-10 rounded-md border border-white/10 bg-[#10141b] px-3 text-sm text-white outline-none focus:border-blue-300/60"
+          className="h-10 rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none transition focus:border-blue-400 focus:bg-white"
         >
-          <option value="All">All statuses</option>
+          <option value="All">Semua status</option>
           {statusOptions.map((status) => (
             <option key={status} value={status}>
               {status}
@@ -33,7 +39,7 @@ export function FilterBar({ filters, onChange }: FilterBarProps) {
         </select>
 
         <select
-          aria-label="Analytics filter"
+          aria-label="Filter analitik"
           value={filters.analytics}
           onChange={(event) =>
             onChange({
@@ -41,15 +47,15 @@ export function FilterBar({ filters, onChange }: FilterBarProps) {
               analytics: event.target.value as DashboardFilters["analytics"],
             })
           }
-          className="h-10 rounded-md border border-white/10 bg-[#10141b] px-3 text-sm text-white outline-none focus:border-blue-300/60"
+          className="h-10 rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none transition focus:border-blue-400 focus:bg-white"
         >
-          <option value="Overview">Overview</option>
-          <option value="Interviews">Interviews</option>
-          <option value="Offers">Offers</option>
+          <option value="Overview">Ringkasan</option>
+          <option value="Interviews">Wawancara</option>
+          <option value="Offers">Penawaran</option>
         </select>
 
         <select
-          aria-label="Date filter"
+          aria-label="Filter tanggal"
           value={filters.dateRange}
           onChange={(event) =>
             onChange({
@@ -57,11 +63,11 @@ export function FilterBar({ filters, onChange }: FilterBarProps) {
               dateRange: event.target.value as DashboardFilters["dateRange"],
             })
           }
-          className="h-10 rounded-md border border-white/10 bg-[#10141b] px-3 text-sm text-white outline-none focus:border-blue-300/60"
+          className="h-10 rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none transition focus:border-blue-400 focus:bg-white"
         >
-          <option value="All time">All time</option>
-          <option value="Last 7 days">Last 7 days</option>
-          <option value="Last 30 days">Last 30 days</option>
+          <option value="All time">Semua waktu</option>
+          <option value="Last 7 days">7 hari terakhir</option>
+          <option value="Last 30 days">30 hari terakhir</option>
         </select>
       </div>
     </section>
