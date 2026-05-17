@@ -143,13 +143,7 @@ Keluar dari PostgreSQL:
 
 ### 5. Jalankan schema database
 
-Jika file schema berada di `backend/supabase/schema.sql`, jalankan:
-
-```bash
-psql -U postgres -d applytics -f supabase/schema.sql
-```
-
-Jika menggunakan file dump atau seed, jalankan sesuai nama file:
+Jalankan file seed.sql:
 
 ```bash
 psql -U postgres -d applytics -f seed.sql
@@ -213,17 +207,8 @@ npm install
 
 Buat file `.env.local` di dalam folder `frontend`.
 
-Contoh isi:
-
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:5000
-```
-
-Jika frontend masih menggunakan Supabase untuk authentication atau kebutuhan lain, tambahkan environment Supabase sesuai konfigurasi project:
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
 ### 4. Jalankan frontend
