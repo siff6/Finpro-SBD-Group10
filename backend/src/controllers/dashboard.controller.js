@@ -15,12 +15,18 @@ import {
 
 const CACHE_TTL_SECONDS = 300;
 
+const getUserIdFromToken = (req) => {
+    return req.user?.user_id || req.user?.id || req.user?.sub;
+};
+
 const getDashboardSummary = async (req, res, next) => {
     try {
-        const userId = req.query.user_id;
+        const userId = getUserIdFromToken(req);
 
         if (!userId) {
-            return res.status(400).json({ message: "user_id is required" });
+            return res.status(401).json({
+                message: "Sesi login tidak valid. Silakan login ulang.",
+            });
         }
 
         const cacheKey = dashboardSummaryKey(userId);
@@ -41,10 +47,12 @@ const getDashboardSummary = async (req, res, next) => {
 
 const getDashboardStatusCount = async (req, res, next) => {
     try {
-        const userId = req.query.user_id;
+        const userId = getUserIdFromToken(req);
 
         if (!userId) {
-            return res.status(400).json({ message: "user_id is required" });
+            return res.status(401).json({
+                message: "Sesi login tidak valid. Silakan login ulang.",
+            });
         }
 
         const cacheKey = dashboardStatusCountKey(userId);
@@ -65,10 +73,12 @@ const getDashboardStatusCount = async (req, res, next) => {
 
 const getDashboardMonthlyProgress = async (req, res, next) => {
     try {
-        const userId = req.query.user_id;
+        const userId = getUserIdFromToken(req);
 
         if (!userId) {
-            return res.status(400).json({ message: "user_id is required" });
+            return res.status(401).json({
+                message: "Sesi login tidak valid. Silakan login ulang.",
+            });
         }
 
         const cacheKey = dashboardMonthlyProgressKey(userId);

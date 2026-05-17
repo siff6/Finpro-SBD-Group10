@@ -1,17 +1,115 @@
 import { query } from "../config/db.js";
 import { invalidateDashboardCache } from "../services/cache.service.js";
 
+const MAX_SALARY = 999_999_999_999_999;
+
+const parseSalary = (salary) => {
+  const salaryNumber = Number(salary ?? 0);
+
+  if (!Number.isFinite(salaryNumber)) {
+    return {
+      error: "Gaji harus berupa angka.",
+    };
+  }
+
+  if (!Number.isSafeInteger(salaryNumber)) {
+    return {
+      error: "Gaji harus berupa angka bulat yang valid.",
+    };
+  }
+
+  if (salaryNumber < 0) {
+    return {
+      error: "Gaji tidak boleh kurang dari 0.",
+    };
+  }
+
+  if (salaryNumber > MAX_SALARY) {
+    return {
+      error: "Gaji terlalu besar.",
+    };
+  }
+
+  return {
+    value: salaryNumber,
+  };
+};
+
+const allowedJobTypes = [
+    "Full-time",
+    "Part-time",
+    "Internship",
+    "Contract",
+    "Freelance",
+];
+
+const getUserIdFromToken = (req) => {
+    return req.user?.user_id || req.user?.id || req.user?.sub;
+};
+
 const getApplications = async (req, res, next) => {
     try {
-        const userId = req.query.user_id;
+        const userId = getUserIdFromToken(req);
 
         if (!userId) {
-            return res.status(400).json({ message: "user_id is required" });
+            return res.status(401).json({
+                message: "Sesi login tidak valid. Silakan login ulang.",
+            });
+        }
+
+        const { search, status, job_type: jobType, source } = req.query;
+
+        const values = [userId];
+
+        let whereClause = "where ja.user_id = $1";
+
+        if (search) {
+            values.push(`%${search}%`);
+            whereClause += ` and (
+                c.company_name ilike $${values.length}
+                or ja.position ilike $${values.length}
+                or ja.status ilike $${values.length}
+                or ja.job_type ilike $${values.length}
+                or ja.source ilike $${values.length}
+            )`;
+        }
+
+        if (status) {
+            values.push(status);
+            whereClause += ` and ja.status = $${values.length}`;
+        }
+
+        if (jobType) {
+            values.push(jobType);
+            whereClause += ` and ja.job_type = $${values.length}`;
+        }
+
+        if (source) {
+            values.push(source);
+            whereClause += ` and ja.source = $${values.length}`;
         }
 
         const result = await query(
-            "select * from job_applications where user_id = $1 order by created_at desc",
-            [userId]
+            `
+            select
+                ja.application_id,
+                ja.user_id,
+                ja.company_id,
+                c.company_name,
+                ja.position,
+                ja.status,
+                ja.application_date,
+                ja.salary,
+                ja.job_type,
+                ja.source,
+                ja.created_at,
+                ja.updated_at
+            from job_applications ja
+            join companies c on c.company_id = ja.company_id
+            ${whereClause}
+            order by ja.created_at desc
+            `,
+            values
         );
 
         return res.json(result.rows);
@@ -22,20 +120,39 @@ const getApplications = async (req, res, next) => {
 
 const getApplicationById = async (req, res, next) => {
     try {
-        const userId = req.query.user_id;
+        const userId = getUserIdFromToken(req);
         const { id } = req.params;
 
         if (!userId) {
-            return res.status(400).json({ message: "user_id is required" });
+            return res.status(401).json({
+                message: "Sesi login tidak valid. Silakan login ulang.",
+            });
         }
 
         const result = await query(
-            "select * from job_applications where application_id = $1 and user_id = $2",
+            `
+            select
+                ja.application_id,
+                ja.user_id,
+                ja.company_id,
+                c.company_name,
+                ja.position,
+                ja.status,
+                ja.application_date,
+                ja.salary,
+                ja.job_type,
+                ja.source,
+                ja.created_at,
+                ja.updated_at
+            from job_applications ja
+            join companies c on c.company_id = ja.company_id
+            where ja.application_id = $1 and ja.user_id = $2
+            `,
             [id, userId]
         );
 
         if (result.rows.length === 0) {
-            return res.status(404).json({ message: "Application not found" });
+            return res.status(404).json({ message: "Lamaran tidak ditemukan." });
         }
 
         return res.json(result.rows[0]);
@@ -46,8 +163,15 @@ const getApplicationById = async (req, res, next) => {
 
 const createApplication = async (req, res, next) => {
     try {
+        const userId = getUserIdFromToken(req);
+
+        if (!userId) {
+            return res.status(401).json({
+                message: "Sesi login tidak valid. Silakan login ulang.",
+            });
+        }
+
         const {
-            user_id: userId,
             company_id: companyId,
             position,
             status,
@@ -57,22 +181,41 @@ const createApplication = async (req, res, next) => {
             source,
         } = req.body;
 
-        // TODO: user_id should come from auth middleware/JWT.
-        if (!userId || !companyId || !position) {
-            return res
-                .status(400)
-                .json({ message: "user_id, company_id, and position are required" });
+        if (!companyId || !position) {
+            return res.status(400).json({
+                message: "Perusahaan dan posisi wajib diisi.",
+            });
+        }
+
+        if (jobType && !allowedJobTypes.includes(jobType)) {
+            return res.status(400).json({
+                message: "Jenis kerja tidak valid.",
+            });
+        }
+
+        const parsedSalary = parseSalary(salary);
+
+        if (parsedSalary.error) {
+            return res.status(400).json({
+                message: parsedSalary.error,
+            });
         }
 
         const result = await query(
-            "insert into job_applications (user_id, company_id, position, status, application_date, salary, job_type, source) values ($1, $2, $3, $4, $5, $6, $7, $8) returning *",
+            `
+            insert into job_applications
+                (user_id, company_id, position, status, application_date, salary, job_type, source)
+            values
+                ($1, $2, $3, $4, $5, $6, $7, $8)
+            returning *
+            `,
             [
                 userId,
                 companyId,
                 position,
                 status || "Applied",
                 applicationDate || new Date(),
-                salary ?? 0,
+                parsedSalary.value,
                 jobType || "Full-time",
                 source || null,
             ]
@@ -81,8 +224,13 @@ const createApplication = async (req, res, next) => {
         const created = result.rows[0];
 
         await query(
-            "insert into application_status_history (application_id, old_status, new_status, note) values ($1, $2, $3, $4)",
-            [created.application_id, null, created.status, "Initial status"]
+            `
+            insert into application_status_history
+                (application_id, old_status, new_status, note)
+            values
+                ($1, $2, $3, $4)
+            `,
+            [created.application_id, null, created.status, "Status awal lamaran"]
         );
 
         await invalidateDashboardCache(userId);
@@ -95,9 +243,16 @@ const createApplication = async (req, res, next) => {
 
 const updateApplication = async (req, res, next) => {
     try {
+        const userId = getUserIdFromToken(req);
         const { id } = req.params;
+
+        if (!userId) {
+            return res.status(401).json({
+                message: "Sesi login tidak valid. Silakan login ulang.",
+            });
+        }
+
         const {
-            user_id: userId,
             company_id: companyId,
             position,
             status,
@@ -107,30 +262,56 @@ const updateApplication = async (req, res, next) => {
             source,
         } = req.body;
 
-        // TODO: user_id should come from auth middleware/JWT.
-        if (!userId) {
-            return res.status(400).json({ message: "user_id is required" });
+        if (jobType && !allowedJobTypes.includes(jobType)) {
+            return res.status(400).json({
+                message: "Jenis kerja tidak valid.",
+            });
         }
 
         const existingResult = await query(
-            "select status from job_applications where application_id = $1 and user_id = $2",
+            `
+            select status
+            from job_applications
+            where application_id = $1 and user_id = $2
+            `,
             [id, userId]
         );
 
         if (existingResult.rows.length === 0) {
-            return res.status(404).json({ message: "Application not found" });
+            return res.status(404).json({ message: "Lamaran tidak ditemukan." });
         }
 
         const oldStatus = existingResult.rows[0].status;
 
+        const parsedSalary = parseSalary(salary);
+
+        if (parsedSalary.error) {
+            return res.status(400).json({
+                message: parsedSalary.error,
+            });
+        }
+
         const updateResult = await query(
-            "update job_applications set company_id = $1, position = $2, status = $3, application_date = $4, salary = $5, job_type = $6, source = $7, updated_at = now() where application_id = $8 and user_id = $9 returning *",
+            `
+            update job_applications
+            set
+                company_id = $1,
+                position = $2,
+                status = $3,
+                application_date = $4,
+                salary = $5,
+                job_type = $6,
+                source = $7,
+                updated_at = now()
+            where application_id = $8 and user_id = $9
+            returning *
+            `,
             [
                 companyId,
                 position,
                 status,
                 applicationDate,
-                salary,
+                parsedSalary.value,
                 jobType,
                 source,
                 id,
@@ -142,8 +323,13 @@ const updateApplication = async (req, res, next) => {
 
         if (status && status !== oldStatus) {
             await query(
-                "insert into application_status_history (application_id, old_status, new_status, note) values ($1, $2, $3, $4)",
-                [id, oldStatus, status, "Status changed"]
+                `
+                insert into application_status_history
+                    (application_id, old_status, new_status, note)
+                values
+                    ($1, $2, $3, $4)
+                `,
+                [id, oldStatus, status, "Status lamaran diperbarui"]
             );
         }
 
@@ -157,25 +343,31 @@ const updateApplication = async (req, res, next) => {
 
 const deleteApplication = async (req, res, next) => {
     try {
+        const userId = getUserIdFromToken(req);
         const { id } = req.params;
-        const userId = req.query.user_id;
 
         if (!userId) {
-            return res.status(400).json({ message: "user_id is required" });
+            return res.status(401).json({
+                message: "Sesi login tidak valid. Silakan login ulang.",
+            });
         }
 
         const result = await query(
-            "delete from job_applications where application_id = $1 and user_id = $2 returning *",
+            `
+            delete from job_applications
+            where application_id = $1 and user_id = $2
+            returning *
+            `,
             [id, userId]
         );
 
         if (result.rows.length === 0) {
-            return res.status(404).json({ message: "Application not found" });
+            return res.status(404).json({ message: "Lamaran tidak ditemukan." });
         }
 
         await invalidateDashboardCache(userId);
 
-        return res.json({ message: "Application deleted" });
+        return res.json({ message: "Lamaran berhasil dihapus." });
     } catch (err) {
         return next(err);
     }

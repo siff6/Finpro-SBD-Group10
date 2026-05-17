@@ -79,7 +79,7 @@ create table public.job_applications (
 
   application_date date not null default current_date,
 
-  salary integer not null default 0
+  salary bigint not null default 0
     check (salary >= 0),
 
   job_type text not null default 'Full-time'
@@ -227,13 +227,14 @@ create index application_notes_user_id_idx
 -- Password disimpan dalam bentuk bcrypt hash.
 
 -- USERS
-insert into public.users (user_id, username, email, password, created_at)
+insert into public.users (user_id, username, email, password, is_verified, created_at)
 values
 (
   '11111111-1111-1111-1111-111111111111',
   'Ziehan',
   'ziehan@example.com',
   '$2b$10$KYVbZ5JFVfqu0oV0rQb3E.KG5V5GEZIBxC6JYwRjzKsX9y2PfZkiC',
+  true,
   now()
 ),
 (
@@ -241,6 +242,7 @@ values
   'Demo User',
   'demo@example.com',
   '$2b$10$KYVbZ5JFVfqu0oV0rQb3E.KG5V5GEZIBxC6JYwRjzKsX9y2PfZkiC',
+  true,
   now()
 );
 

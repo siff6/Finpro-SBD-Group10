@@ -1,5 +1,6 @@
 "use client";
 
+import { API_BASE_URL } from "@/lib/api";
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -68,7 +69,7 @@ function VerifyEmailContent() {
     setIsVerifying(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/verify-email", {
+      const res = await fetch(`${API_BASE_URL}/auth/verify-email`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -109,7 +110,7 @@ function VerifyEmailContent() {
     setIsResending(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/resend-verification-code", {
+      const res = await fetch(`${API_BASE_URL}/auth/resend-verification-code`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

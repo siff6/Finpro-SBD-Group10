@@ -1,5 +1,6 @@
 "use client";
 
+import { API_BASE_URL } from "@/lib/api";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -30,7 +31,7 @@ export default function LoginPage() {
     setShowVerifyLink(false);
     setIsLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
+      const res = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -39,9 +40,12 @@ export default function LoginPage() {
       if (!res.ok) {
         throw new Error(data.message || "Autentikasi gagal. Silakan periksa email dan kata sandi Anda.");
       }
+      if (!data.token || !data.user?.username) {
+        throw new Error("Respons login tidak valid. Silakan coba lagi.");
+      }
       localStorage.setItem("applytics-token", data.token);
       localStorage.setItem("applytics-user", data.user.username);
-      router.push("/dashboard");
+      router.replace("/dashboard");
     } catch (err: any) {
       const message = err.message || "Autentikasi gagal. Silakan periksa email dan kata sandi Anda.";
       setError(message);

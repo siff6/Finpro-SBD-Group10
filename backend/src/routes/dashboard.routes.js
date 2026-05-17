@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { verifyToken } from "../middleware/auth.middleware.js";
 import {
     getDashboardSummary,
     getDashboardStatusCount,
@@ -7,8 +8,8 @@ import {
 
 const router = Router();
 
-router.get("/summary", getDashboardSummary);
-router.get("/status-count", getDashboardStatusCount);
-router.get("/monthly-progress", getDashboardMonthlyProgress);
+router.get("/summary", verifyToken, getDashboardSummary);
+router.get("/status-count", verifyToken, getDashboardStatusCount);
+router.get("/monthly-progress", verifyToken, getDashboardMonthlyProgress);
 
 export default router;

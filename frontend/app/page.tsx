@@ -1,6 +1,5 @@
 import Link from "next/link";
 import {
-  ArrowRight,
   BarChart3,
   CheckCircle2,
   ClipboardList,
@@ -11,37 +10,56 @@ import {
 } from "lucide-react";
 import { LandingDashboardMockup } from "@/components/charts/landing-dashboard-mockup";
 import { SiteHeader } from "@/components/layout/site-header";
+import { LandingHeroActions } from "@/components/landing/landing-hero-actions";
 
 const features = [
   {
     icon: ClipboardList,
-    title: "Smart Application Tracking",
-    body: "Organize company, position, salary, contact, and next steps in one clean workspace.",
+    title: "Pelacakan Lamaran Terstruktur",
+    body: "Kelola nama perusahaan, posisi, gaji, sumber lowongan, jenis kerja, dan status lamaran dalam satu tempat yang rapi.",
   },
   {
     icon: TableProperties,
-    title: "Interactive Spreadsheet",
-    body: "Inline editing, date fields, select badges, and searchable cells without spreadsheet clutter.",
+    title: "Tabel Lamaran Interaktif",
+    body: "Perbarui data lamaran dengan mudah melalui tabel yang ringan, jelas, dan nyaman digunakan tanpa tampilan yang membingungkan.",
   },
   {
     icon: BarChart3,
-    title: "Recruitment Analytics",
-    body: "Donut and bar charts summarize status ratios, interviews, and acceptance patterns.",
+    title: "Analitik Rekrutmen",
+    body: "Lihat ringkasan status lamaran, jumlah wawancara, dan perkembangan proses rekrutmen melalui visualisasi yang mudah dipahami.",
   },
   {
     icon: KanbanSquare,
-    title: "Status Workflow",
-    body: "Applied, Rejected, Interviewed, Accepted, and Offer states stay readable at a glance.",
+    title: "Alur Status Lamaran",
+    body: "Pantau status lamaran seperti Applied, Interviewed, Accepted, Rejected, dan Offer dengan tampilan yang konsisten.",
   },
   {
     icon: Layers3,
-    title: "Multi-Select Actions",
-    body: "Track combined tasks like Follow up, Waiting, Prepare Interview, Send email, and Decide.",
+    title: "Aksi Lanjutan",
+    body: "Catat tindakan berikutnya seperti follow up, persiapan wawancara, pengiriman email, atau keputusan akhir.",
   },
   {
     icon: Filter,
-    title: "Interview Monitoring",
-    body: "Filter by status, analytics focus, and application date to understand your pipeline.",
+    title: "Filter dan Pemantauan",
+    body: "Saring data berdasarkan status, tanggal lamaran, dan kebutuhan analisis agar proses pencarian kerja lebih terarah.",
+  },
+];
+
+const metrics = [
+  {
+    label: "Rasio diterima",
+    value: "28%",
+    description: "Ringkasan hasil lamaran",
+  },
+  {
+    label: "Jumlah wawancara",
+    value: "11",
+    description: "Lamaran yang masuk tahap lanjut",
+  },
+  {
+    label: "Aksi terbuka",
+    value: "17",
+    description: "Tugas yang perlu ditindaklanjuti",
   },
 ];
 
@@ -49,136 +67,158 @@ export default function Home() {
   return (
     <>
       <SiteHeader />
-      <main className="bg-[#07090d] text-white">
-        <section className="mx-auto grid min-h-[calc(100vh-64px)] w-full max-w-7xl items-center gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[0.86fr_1.14fr]">
-          <div className="max-w-2xl">
-            <span className="inline-flex items-center rounded-md border border-blue-300/25 px-3 py-1 text-xs uppercase tracking-[0.2em] text-blue-200">
-              Modern job tracking workspace
-            </span>
-            <h1 className="mt-5 text-5xl font-semibold leading-[1.02] tracking-normal text-white sm:text-6xl">
-              Stop Managing Job Applications with Spreadsheets
-            </h1>
-            <p className="mt-5 max-w-xl text-lg leading-8 text-zinc-300">
-              Applytics helps you organize applications, track interview progress,
-              analyze recruitment outcomes, and simplify the job hunting workflow.
-            </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Link
-                href="/dashboard"
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-md bg-blue-400 px-5 font-semibold text-black transition hover:bg-blue-300"
-              >
-                Get Started
-                <ArrowRight size={18} />
-              </Link>
-              <Link
-                href="/register"
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-md border border-white/12 px-5 font-medium text-white transition hover:border-blue-300/70"
-              >
-                Register Now
-              </Link>
+
+      <main className="bg-slate-50 text-slate-900">
+        <section className="relative overflow-hidden border-b border-slate-200 bg-white">
+          <div className="absolute left-1/2 top-0 h-72 w-72 -translate-x-1/2 rounded-full bg-blue-100/70 blur-3xl" />
+          <div className="absolute right-0 top-20 h-72 w-72 rounded-full bg-slate-100 blur-3xl" />
+
+          <div className="relative mx-auto grid min-h-[calc(100vh-64px)] w-full max-w-7xl items-center gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[0.86fr_1.14fr]">
+            <div className="max-w-2xl">
+              <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-slate-600">
+                Workspace pelacakan lamaran kerja
+              </span>
+
+              <h1 className="mt-6 text-5xl font-semibold leading-[1.02] tracking-[-0.04em] text-slate-950 sm:text-6xl">
+                Kelola Lamaran Kerja dengan Lebih Rapi dan Terukur
+              </h1>
+
+              <p className="mt-5 max-w-xl text-lg leading-8 text-slate-600">
+                Applytics membantu Anda mencatat lamaran, memantau progres
+                wawancara, menganalisis hasil rekrutmen, dan mengatur proses
+                pencarian kerja dalam satu dashboard yang mudah digunakan.
+              </p>
+
+              <LandingHeroActions />
+
+              <div className="mt-8 grid gap-3 text-sm text-slate-600 sm:grid-cols-3">
+                {["Data tersimpan rapi", "Dashboard ringan", "Analitik mudah dibaca"].map(
+                  (item) => (
+                    <div key={item} className="flex items-center gap-2">
+                      <CheckCircle2 size={16} className="text-blue-600" />
+                      <span>{item}</span>
+                    </div>
+                  ),
+                )}
+              </div>
+            </div>
+
+            <div className="rounded-[2rem] border border-slate-200 bg-slate-50 p-3 shadow-xl shadow-slate-200/70">
+              <LandingDashboardMockup />
             </div>
           </div>
-
-          <LandingDashboardMockup />
         </section>
 
-        <section id="features" className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6">
+        <section id="features" className="mx-auto w-full max-w-7xl px-4 py-20 sm:px-6">
           <div className="max-w-2xl">
-            <span className="text-xs uppercase tracking-[0.2em] text-blue-200">Features</span>
-            <h2 className="mt-3 text-3xl font-semibold text-white sm:text-4xl">
-              Built like a productivity tool, focused on job hunting
+            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+              Fitur Utama
+            </span>
+
+            <h2 className="mt-3 text-3xl font-semibold tracking-[-0.03em] text-slate-950 sm:text-4xl">
+              Dirancang untuk membantu proses pencarian kerja menjadi lebih teratur
             </h2>
+
+            <p className="mt-4 text-base leading-7 text-slate-600">
+              Semua fitur dibuat agar data lamaran mudah dicatat, mudah dibaca,
+              dan mudah dianalisis tanpa perlu mengatur spreadsheet secara manual.
+            </p>
           </div>
-          <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+
+          <div className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {features.map((feature) => {
               const Icon = feature.icon;
 
               return (
                 <article
                   key={feature.title}
-                  className="rounded-lg border border-white/10 bg-white/[0.045] p-5 transition hover:-translate-y-1 hover:border-blue-300/35 hover:bg-white/[0.065]"
+                  className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-200/60 transition hover:-translate-y-1 hover:border-slate-300 hover:shadow-lg hover:shadow-slate-200/80"
                 >
-                  <span className="grid size-10 place-items-center rounded-md bg-blue-400/12 text-blue-200">
+                  <span className="grid size-11 place-items-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 transition group-hover:border-blue-200 group-hover:bg-blue-50 group-hover:text-blue-700">
                     <Icon size={20} />
                   </span>
-                  <h3 className="mt-5 text-lg font-semibold text-white">{feature.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-zinc-400">{feature.body}</p>
+
+                  <h3 className="mt-5 text-lg font-semibold text-slate-950">
+                    {feature.title}
+                  </h3>
+
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    {feature.body}
+                  </p>
                 </article>
               );
             })}
           </div>
         </section>
 
-        <section className="mx-auto grid w-full max-w-7xl gap-8 px-4 py-16 sm:px-6 lg:grid-cols-[0.8fr_1.2fr]">
-          <div>
-            <span className="text-xs uppercase tracking-[0.2em] text-green-200">
-              Analytics showcase
-            </span>
-            <h2 className="mt-3 text-3xl font-semibold text-white sm:text-4xl">
-              See your recruitment process clearly
-            </h2>
-            <p className="mt-4 text-sm leading-7 text-zinc-400">
-              Donut charts highlight accepted, rejected, and ongoing applications.
-              Bar charts reveal application volume and interview momentum.
-            </p>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-3">
-            {[
-              ["Accepted ratio", "28%", "text-green-200"],
-              ["Interview count", "11", "text-yellow-200"],
-              ["Open actions", "17", "text-purple-200"],
-            ].map(([label, value, color]) => (
-              <article key={label} className="rounded-lg border border-white/10 bg-white/[0.045] p-5">
-                <span className="text-sm text-zinc-500">{label}</span>
-                <span className={`mt-4 block text-4xl font-semibold ${color}`}>{value}</span>
-              </article>
-            ))}
-          </div>
-        </section>
+        <section className="border-y border-slate-200 bg-white">
+          <div className="mx-auto grid w-full max-w-7xl gap-8 px-4 py-20 sm:px-6 lg:grid-cols-[0.8fr_1.2fr]">
+            <div>
+              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                Ringkasan Analitik
+              </span>
 
-        <section className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6">
-          <div className="rounded-lg border border-white/10 bg-white/[0.045] p-5 sm:p-6">
-            <span className="text-xs uppercase tracking-[0.2em] text-blue-200">Comparison</span>
-            <div className="mt-6 grid gap-4 md:grid-cols-2">
-              <ComparisonCard
-                title="Spreadsheet biasa"
-                items={[
-                  "Manual status tracking",
-                  "No workflow context",
-                  "Hard to read analytics",
-                  "Next actions mixed with notes",
-                ]}
-              />
-              <ComparisonCard
-                title="Applytics"
-                items={[
-                  "Structured job application database",
-                  "Status and multi-action badges",
-                  "Realtime analytics filters",
-                  "Dashboard built for repeated use",
-                ]}
-                highlighted
-              />
+              <h2 className="mt-3 text-3xl font-semibold tracking-[-0.03em] text-slate-950 sm:text-4xl">
+                Pahami perkembangan lamaran dengan lebih jelas
+              </h2>
+
+              <p className="mt-4 text-sm leading-7 text-slate-600">
+                Grafik dan metrik membantu Anda melihat status lamaran, jumlah
+                wawancara, serta tindakan lanjutan yang masih perlu diselesaikan.
+              </p>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-3">
+              {metrics.map((metric) => (
+                <article
+                  key={metric.label}
+                  className="rounded-2xl border border-slate-200 bg-slate-50 p-5 shadow-sm"
+                >
+                  <span className="text-sm font-medium text-slate-600">
+                    {metric.label}
+                  </span>
+
+                  <span className="mt-4 block text-4xl font-semibold tracking-[-0.04em] text-slate-950">
+                    {metric.value}
+                  </span>
+
+                  <p className="mt-3 text-sm leading-6 text-slate-500">
+                    {metric.description}
+                  </p>
+                </article>
+              ))}
             </div>
           </div>
         </section>
 
-        <section className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6">
-          <div className="rounded-lg border border-blue-300/20 bg-blue-400/10 p-8 text-center">
-            <h2 className="text-3xl font-semibold text-white sm:text-4xl">
-              Track Your Job Applications Smarter
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-zinc-300">
-              Replace scattered spreadsheets with a modern dashboard for fresh graduates,
-              internship seekers, and active job hunters.
-            </p>
-            <Link
-              href="/dashboard"
-              className="mt-7 inline-flex h-12 items-center justify-center gap-2 rounded-md bg-white px-5 font-semibold text-black transition hover:bg-blue-100"
-            >
-              Open Dashboard
-              <ArrowRight size={18} />
-            </Link>
+        <section className="mx-auto w-full max-w-7xl px-4 py-20 sm:px-6">
+          <div className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm shadow-slate-200/70 sm:p-6">
+            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+              Perbandingan
+            </span>
+
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              <ComparisonCard
+                title="Spreadsheet Biasa"
+                items={[
+                  "Status lamaran diperbarui secara manual",
+                  "Konteks proses rekrutmen sulit dipantau",
+                  "Analitik perlu dibuat sendiri",
+                  "Tindakan lanjutan sering bercampur dengan catatan lain",
+                ]}
+              />
+
+              <ComparisonCard
+                title="Applytics"
+                items={[
+                  "Data lamaran tersimpan dalam struktur yang jelas",
+                  "Status dan aksi lanjutan mudah dipantau",
+                  "Analitik tersedia langsung dari dashboard",
+                  "Tampilan dibuat untuk penggunaan berulang",
+                ]}
+                highlighted
+              />
+            </div>
           </div>
         </section>
       </main>
@@ -197,18 +237,29 @@ function ComparisonCard({
 }) {
   return (
     <article
-      className={`rounded-lg border p-5 ${
+      className={`rounded-2xl border p-5 ${
         highlighted
-          ? "border-blue-300/25 bg-blue-400/10"
-          : "border-white/10 bg-black/20"
+          ? "border-blue-200 bg-blue-50 text-slate-950 shadow-sm shadow-blue-100/80"
+          : "border-slate-200 bg-slate-50 text-slate-950"
       }`}
     >
-      <h3 className="text-xl font-semibold text-white">{title}</h3>
+      <h3 className="text-xl font-semibold text-slate-950">
+        {title}
+      </h3>
+
       <ul className="mt-4 grid gap-3">
         {items.map((item) => (
-          <li key={item} className="flex items-center gap-3 text-sm text-zinc-300">
-            <CheckCircle2 size={16} className={highlighted ? "text-blue-200" : "text-zinc-600"} />
-            {item}
+          <li
+            key={item}
+            className="flex items-start gap-3 text-sm leading-6 text-slate-600"
+          >
+            <CheckCircle2
+              size={16}
+              className={`mt-1 shrink-0 ${
+                highlighted ? "text-blue-700" : "text-slate-800"
+              }`}
+            />
+            <span>{item}</span>
           </li>
         ))}
       </ul>
