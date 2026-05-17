@@ -7,18 +7,18 @@ import { StatusBadge } from "@/components/table/status-badge";
 import { ActionBadge } from "@/components/table/action-badge";
 
 const pieData = [
-  { name: "Accepted", value: 28, color: "#4ade80" },
-  { name: "Interviewed", value: 34, color: "#facc15" },
-  { name: "Rejected", value: 16, color: "#f87171" },
-  { name: "Applied", value: 22, color: "#60a5fa" },
+  { name: "Accepted", value: 28, color: "#16a34a" },
+  { name: "Interviewed", value: 34, color: "#eab308" },
+  { name: "Rejected", value: 16, color: "#ef4444" },
+  { name: "Applied", value: 22, color: "#2563eb" },
 ];
 
 const barData = [
-  { label: "Mon", value: 3 },
-  { label: "Tue", value: 5 },
-  { label: "Wed", value: 2 },
-  { label: "Thu", value: 7 },
-  { label: "Fri", value: 4 },
+  { label: "Sen", value: 3 },
+  { label: "Sel", value: 5 },
+  { label: "Rab", value: 2 },
+  { label: "Kam", value: 7 },
+  { label: "Jum", value: 4 },
 ];
 
 export function LandingDashboardMockup() {
@@ -31,37 +31,48 @@ export function LandingDashboardMockup() {
       transition={{ duration: 0.55, ease: "easeOut" }}
       className="relative"
     >
-      <div className="rounded-lg border border-white/10 bg-[#10141b]/88 p-4 shadow-[0_28px_120px_rgba(0,0,0,0.35)] backdrop-blur">
-        <div className="flex items-center justify-between border-b border-white/10 pb-4">
+      <div className="rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-xl shadow-slate-200/80">
+        <div className="flex items-center justify-between border-b border-slate-200 pb-4">
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-blue-200">Dashboard</p>
-            <h2 className="mt-1 text-xl font-semibold text-white">Application Pipeline</h2>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+              Dashboard
+            </p>
+            <h2 className="mt-1 text-xl font-semibold text-slate-950">
+              Ringkasan Lamaran
+            </h2>
           </div>
-          <span className="rounded-md border border-green-300/20 bg-green-400/12 px-3 py-1 text-xs text-green-100">
-            Live
+
+          <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+            Aktif
           </span>
         </div>
 
         <div className="mt-4 grid gap-3 sm:grid-cols-3">
           {[
-            ["Applications", "42"],
-            ["Interviews", "11"],
-            ["Offers", "4"],
+            ["Lamaran", "42"],
+            ["Wawancara", "11"],
+            ["Penawaran", "4"],
           ].map(([label, value]) => (
-            <div key={label} className="rounded-md border border-white/10 bg-white/[0.045] p-3">
-              <span className="text-xs text-zinc-500">{label}</span>
-              <span className="mt-1 block text-2xl font-semibold text-white">{value}</span>
+            <div
+              key={label}
+              className="rounded-2xl border border-slate-200 bg-slate-50 p-3"
+            >
+              <span className="text-xs font-medium text-slate-500">{label}</span>
+              <span className="mt-1 block text-2xl font-semibold text-slate-950">
+                {value}
+              </span>
             </div>
           ))}
         </div>
 
         <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_0.8fr]">
-          <div className="overflow-hidden rounded-md border border-white/10">
-            <div className="grid grid-cols-[1.2fr_1fr_1fr] border-b border-white/10 bg-white/[0.035] px-3 py-2 text-xs uppercase tracking-[0.16em] text-zinc-500">
-              <span>Company</span>
+          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+            <div className="grid grid-cols-[1.2fr_1fr_1fr] border-b border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+              <span>Perusahaan</span>
               <span>Status</span>
-              <span>Action</span>
+              <span>Aksi</span>
             </div>
+
             {[
               ["Orbit", "Interviewed", "Prepare Interview"],
               ["Kirana", "Offer", "Decide"],
@@ -69,17 +80,23 @@ export function LandingDashboardMockup() {
             ].map(([company, status, action]) => (
               <div
                 key={company}
-                className="grid grid-cols-[1.2fr_1fr_1fr] items-center gap-2 border-b border-white/8 px-3 py-3 last:border-b-0"
+                className="grid grid-cols-[1.2fr_1fr_1fr] items-center gap-2 border-b border-slate-100 px-3 py-3 last:border-b-0"
               >
-                <span className="text-sm text-white">{company}</span>
+                <span className="text-sm font-medium text-slate-800">
+                  {company}
+                </span>
+
                 <StatusBadge status={status as "Applied" | "Interviewed" | "Offer"} />
-                <ActionBadge action={action as "Prepare Interview" | "Decide" | "Waiting"} />
+
+                <ActionBadge
+                  action={action as "Prepare Interview" | "Decide" | "Waiting"}
+                />
               </div>
             ))}
           </div>
 
           <div className="grid gap-3">
-            <div className="h-36 min-h-[144px] rounded-md border border-white/10 bg-black/20 p-2">
+            <div className="h-36 min-h-[144px] rounded-2xl border border-slate-200 bg-slate-50 p-2">
               {mounted ? (
                 <ResponsiveContainer width="99%" height="100%" minWidth={0} minHeight={0}>
                   <PieChart>
@@ -91,19 +108,20 @@ export function LandingDashboardMockup() {
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="size-full rounded-md bg-white/[0.035]" />
+                <div className="size-full rounded-xl bg-slate-100" />
               )}
             </div>
-            <div className="h-36 min-h-[144px] rounded-md border border-white/10 bg-black/20 p-2">
+
+            <div className="h-36 min-h-[144px] rounded-2xl border border-slate-200 bg-slate-50 p-2">
               {mounted ? (
                 <ResponsiveContainer width="99%" height="100%" minWidth={0} minHeight={0}>
                   <BarChart data={barData}>
                     <XAxis dataKey="label" hide />
-                    <Bar dataKey="value" fill="#60a5fa" radius={[5, 5, 1, 1]} />
+                    <Bar dataKey="value" fill="#2563eb" radius={[5, 5, 1, 1]} />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="size-full rounded-md bg-white/[0.035]" />
+                <div className="size-full rounded-xl bg-slate-100" />
               )}
             </div>
           </div>
