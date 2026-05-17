@@ -28,7 +28,7 @@ export function ApplicationTable({
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
-      className="min-w-0 max-w-full overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm"
+      className="min-w-0 max-w-full overflow-visible rounded-lg border border-slate-200 bg-white shadow-sm"
     >
       <div className="flex min-w-0 flex-col gap-3 border-b border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -63,7 +63,7 @@ export function ApplicationTable({
         </div>
       </div>
 
-      <div className="w-full max-w-full overflow-hidden">
+      <div className="w-full max-w-full overflow-visible">
         <table className="w-full table-fixed border-separate border-spacing-0">
           <TableHeader />
           <tbody>
